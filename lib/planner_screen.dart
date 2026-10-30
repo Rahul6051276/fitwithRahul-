@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 import 'database.dart';
 import 'pdf_service.dart';
@@ -12,14 +14,16 @@ class PlannerScreen extends StatefulWidget {
 
 class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProviderStateMixin {
   late TabController _mainTabController;
-  final FiveMealPlan _plan = FiveMealPlan();
-  final List<WorkoutExercise> _selectedWorkouts = [];
+  FiveMealPlan _plan = FiveMealPlan();
+  List<WorkoutExercise> _selectedWorkouts = [];
 
   int _totalMealsToAssign = 3;
   int _activeMealIndex = 1;
 
   final TextEditingController _clientName = TextEditingController();
   final TextEditingController _targetCal = TextEditingController(text: "2000");
+  final TextEditingController _waterTarget = TextEditingController(text: "3.5 - 4 Liters");
+  final TextEditingController _coachNotes = TextEditingController(text: "Creatine 3-5g post workout. Sleep 7-8 hours daily.");
 
   final List<String> _mealTitles = [
     "Meal 1 (Breakfast)",
@@ -39,18 +43,118 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     "45-60 sec hold",
   ];
 
-  final List<String> _restOptions = [
-    "30s",
-    "45s",
-    "60s",
-    "90s",
-    "120s",
-  ];
+  final List<String> _restOptions = ["30s", "45s", "60s", "90s", "120s"];
 
   @override
   void initState() {
     super.initState();
     _mainTabController = TabController(length: 2, vsync: this);
+  }
+
+  // Save Plan Locally
+  Future<void> _saveCurrentPlan() async {
+    final name = _clientName.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Pehle Client ka naam daalein!")),
+      );
+      return;
+    }
+
+    final sp = await SharedPreferences.getInstance();
+    final clientPlan = SavedClientPlan(
+      clientName: name,
+      targetCalories: double.tryParse(_targetCal.text) ?? 2000.0,
+      waterIntake: _waterTarget.text.trim(),
+      coachNotes: _coachNotes.text.trim(),
+      totalMeals: _totalMealsToAssign,
+      plan: _plan,
+      workouts: _selectedWorkouts,
+    );
+
+    await sp.setString('client_$name', jsonEncode(clientPlan.toJson()));
+
+    List<String> list = sp.getStringList('all_clients') ?? [];
+    if (!list.contains(name)) {
+      list.add(name);
+      await sp.setStringList('all_clients', list);
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("$name ka plan phone me save ho gaya! ✅")),
+      );
+    }
+  }
+
+  // Load Saved Client Modal
+  Future<void> _openSavedClientsList() async {
+    final sp = await SharedPreferences.getInstance();
+    List<String> clients = sp.getStringList('all_clients') ?? [];
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (c, setSheet) => Column(
+          children: [
+            const SizedBox(height: 14),
+            const Text("Saved Client Plans", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Divider(),
+            Expanded(
+              child: clients.isEmpty
+                  ? const Center(child: Text("Abhi koi saved client nahi hai."))
+                  : ListView.builder(
+                      itemCount: clients.length,
+                      itemBuilder: (context, i) {
+                        final cName = clients[i];
+                        return ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: Color(0xFF1E293B),
+                            child: Icon(Icons.person, color: Color(0xFFF59E0B)),
+                          ),
+                          title: Text(cName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: const Text("Tap to load full diet & workout"),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                            onPressed: () async {
+                              await sp.remove('client_$cName');
+                              clients.remove(cName);
+                              await sp.setStringList('all_clients', clients);
+                              setSheet(() {});
+                              setState(() {});
+                            },
+                          ),
+                          onTap: () {
+                            final raw = sp.getString('client_$cName');
+                            if (raw != null) {
+                              final saved = SavedClientPlan.fromJson(jsonDecode(raw));
+                              setState(() {
+                                _clientName.text = saved.clientName;
+                                _targetCal.text = saved.targetCalories.toStringAsFixed(0);
+                                _waterTarget.text = saved.waterIntake;
+                                _coachNotes.text = saved.coachNotes;
+                                _totalMealsToAssign = saved.totalMeals;
+                                _plan = saved.plan;
+                                _selectedWorkouts = saved.workouts;
+                              });
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("$cName ka data load ho gaya!")),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _openFoodSheet() {
@@ -211,6 +315,18 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         title: const Text("fitwithRahul Builder", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF1E293B),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.folder_shared, color: Color(0xFFF59E0B)),
+            tooltip: "Saved Clients",
+            onPressed: _openSavedClientsList,
+          ),
+          IconButton(
+            icon: const Icon(Icons.save, color: Colors.white),
+            tooltip: "Save Plan",
+            onPressed: _saveCurrentPlan,
+          ),
+        ],
         bottom: TabBar(
           controller: _mainTabController,
           indicatorColor: const Color(0xFFF59E0B),
@@ -224,21 +340,86 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       ),
       body: Column(
         children: [
+          // Client Details Box
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                Expanded(flex: 2, child: TextField(controller: _clientName, decoration: const InputDecoration(labelText: "Client Name", border: OutlineInputBorder(), filled: true, fillColor: Colors.white))),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _clientName,
+                    decoration: const InputDecoration(
+                      labelText: "Client Name",
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                      isDense: true,
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(flex: 1, child: TextField(controller: _targetCal, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Target Cal", border: OutlineInputBorder(), filled: true, fillColor: Colors.white))),
+                Expanded(
+                  flex: 1,
+                  child: TextField(
+                    controller: _targetCal,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: "Target Cal",
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                      isDense: true,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+
+          // Water & Notes Input
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _waterTarget,
+                    decoration: const InputDecoration(
+                      labelText: "Daily Water Target",
+                      prefixIcon: Icon(Icons.water_drop, color: Colors.blueAccent, size: 20),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _coachNotes,
+                    decoration: const InputDecoration(
+                      labelText: "Coach Notes / Supps",
+                      prefixIcon: Icon(Icons.note_alt, color: Colors.amber, size: 20),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Tab Bar Views
           Expanded(
             child: TabBarView(
               controller: _mainTabController,
               children: [
-                // TAB 1: DIET PLAN
+                // TAB 1: DIET PLANNER
                 Column(
                   children: [
                     Container(
@@ -400,7 +581,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                   ],
                 ),
 
-                // TAB 2: WORKOUT PLANNER (Custom Sets, Reps & Rest Control)
+                // TAB 2: WORKOUT PLANNER
                 Column(
                   children: [
                     Padding(
@@ -433,7 +614,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        // Title & Delete
                                         Row(
                                           children: [
                                             Chip(
@@ -452,12 +632,9 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                                           ],
                                         ),
                                         const Divider(height: 10),
-
-                                        // Sets, Reps, Rest Adjustment Bar
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            // Sets Controls (+ / -)
                                             Row(
                                               children: [
                                                 const Text("Sets: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
@@ -476,8 +653,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                                                 ),
                                               ],
                                             ),
-
-                                            // Reps Dropdown
                                             DropdownButton<String>(
                                               value: _repOptions.contains(ex.reps) ? ex.reps : _repOptions[2],
                                               underline: const SizedBox(),
@@ -487,8 +662,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                                                 if (val != null) setState(() => ex.reps = val);
                                               },
                                             ),
-
-                                            // Rest Dropdown
                                             DropdownButton<String>(
                                               value: _restOptions.contains(ex.restSeconds) ? ex.restSeconds : _restOptions[2],
                                               underline: const SizedBox(),
@@ -512,6 +685,8 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
               ],
             ),
           ),
+
+          // Bottom WhatsApp PDF Share Button
           Container(
             padding: const EdgeInsets.all(12),
             width: double.infinity,
@@ -524,6 +699,8 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 PdfService.sharePdf(
                   clientName: _clientName.text.isEmpty ? "Client" : _clientName.text,
                   targetCalories: double.tryParse(_targetCal.text) ?? 2000.0,
+                  waterTarget: _waterTarget.text.trim(),
+                  coachNotes: _coachNotes.text.trim(),
                   plan: _plan,
                   workouts: _selectedWorkouts.isEmpty ? AppDataSheets.exerciseMasterList.take(6).toList() : _selectedWorkouts,
                 );
