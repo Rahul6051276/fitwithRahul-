@@ -58,7 +58,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
 
     _controller.forward();
 
-    // 2.5 second baad direct home planner screen par navigate karega
+    // 2.5 second ke baad auto navigate karega PlannerScreen par
     Timer(const Duration(milliseconds: 2500), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -78,7 +78,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Deep Slate Navy Dark
+      backgroundColor: const Color(0xFF0F172A), // Dark Slate Theme
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -87,33 +87,29 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Branded Badge Icon
+                // Coach Authentic Circular Photo with Gold Border
                 Container(
-                  width: 100,
-                  height: 100,
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
                     shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFF59E0B), width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF59E0B).withOpacity(0.3),
+                        color: const Color(0xFFF59E0B).withOpacity(0.35),
                         blurRadius: 20,
-                        spreadRadius: 5,
+                        spreadRadius: 4,
                       ),
                     ],
-                    border: Border.all(color: const Color(0xFFF59E0B), width: 2),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.fitness_center,
-                      size: 48,
-                      color: Color(0xFFF59E0B),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/coach_rahul.png'),
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Main App Title
+                // Main Title
                 RichText(
                   text: const TextSpan(
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
@@ -135,7 +131,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
                 ),
                 const SizedBox(height: 8),
 
-                // Tagline & Instagram Handle
+                // Tagline & Handle
                 const Text(
                   "Smart Diet & Hypertrophy Workout Builder",
                   style: TextStyle(
@@ -147,7 +143,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(12),
@@ -156,7 +152,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
                     "@fitwithRahul",
                     style: TextStyle(
                       color: Color(0xFFF59E0B),
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -164,7 +160,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
 
                 const SizedBox(height: 48),
 
-                // Subtle Loading Indicator
+                // Loader
                 const SizedBox(
                   width: 26,
                   height: 26,
