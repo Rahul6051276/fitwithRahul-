@@ -207,6 +207,34 @@ class WorkoutExercise {
       );
 }
 
+class WeeklyWorkoutRoutine {
+  Map<String, List<WorkoutExercise>> days;
+
+  WeeklyWorkoutRoutine({Map<String, List<WorkoutExercise>>? days})
+      : days = days ?? {
+          'Monday': [],
+          'Tuesday': [],
+          'Wednesday': [],
+          'Thursday': [],
+          'Friday': [],
+          'Saturday': [],
+        };
+
+  Map<String, dynamic> toJson() => days.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList()));
+
+  factory WeeklyWorkoutRoutine.fromJson(Map<String, dynamic> json) {
+    Map<String, List<WorkoutExercise>> d = {};
+    for (var k in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']) {
+      if (json[k] != null) {
+        d[k] = (json[k] as List).map((e) => WorkoutExercise.fromJson(e as Map<String, dynamic>)).toList();
+      } else {
+        d[k] = [];
+      }
+    }
+    return WeeklyWorkoutRoutine(days: d);
+  }
+}
+
 class SavedClientPlan {
   final String clientName;
   final double targetCalories;
@@ -214,7 +242,7 @@ class SavedClientPlan {
   final String coachNotes;
   final int totalMeals;
   final FiveMealPlan plan;
-  final List<WorkoutExercise> workouts;
+  final WeeklyWorkoutRoutine weeklyWorkout;
 
   SavedClientPlan({
     required this.clientName,
@@ -223,7 +251,7 @@ class SavedClientPlan {
     required this.coachNotes,
     required this.totalMeals,
     required this.plan,
-    required this.workouts,
+    required this.weeklyWorkout,
   });
 
   Map<String, dynamic> toJson() => {
@@ -233,7 +261,7 @@ class SavedClientPlan {
         'notes': coachNotes,
         'totalMeals': totalMeals,
         'plan': plan.toJson(),
-        'workouts': workouts.map((w) => w.toJson()).toList(),
+        'weeklyWorkout': weeklyWorkout.toJson(),
       };
 
   factory SavedClientPlan.fromJson(Map<String, dynamic> json) => SavedClientPlan(
@@ -243,6 +271,8 @@ class SavedClientPlan {
         coachNotes: json['notes'] as String? ?? "",
         totalMeals: (json['totalMeals'] as num?)?.toInt() ?? 3,
         plan: FiveMealPlan.fromJson(json['plan'] as Map<String, dynamic>),
-        workouts: (json['workouts'] as List).map((w) => WorkoutExercise.fromJson(w as Map<String, dynamic>)).toList(),
+        weeklyWorkout: json['weeklyWorkout'] != null
+            ? WeeklyWorkoutRoutine.fromJson(json['weeklyWorkout'] as Map<String, dynamic>)
+            : WeeklyWorkoutRoutine(),
       );
 }
