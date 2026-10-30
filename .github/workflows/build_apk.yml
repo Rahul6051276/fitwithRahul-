@@ -25,9 +25,10 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      # Explicit project name ke saath create hoga taaki folder name error na de
-      - name: Auto-generate Android platform files
+      # Purane conflicting android folder ko hata kar fresh generate karega
+      - name: Recreate Clean Android Platform Engine
         run: |
+          rm -rf android
           flutter create --platforms=android --org=com.fitwithrahul --project-name=fitwith_rahul .
 
       - name: Install Dependencies
