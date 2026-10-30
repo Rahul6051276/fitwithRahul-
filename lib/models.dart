@@ -115,7 +115,6 @@ class FiveMealPlan {
   List<MealEntry> meal4;
   List<MealEntry> meal5;
 
-  // Explicit Constructor
   FiveMealPlan({
     List<MealEntry>? meal1,
     List<MealEntry>? meal2,
