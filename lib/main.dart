@@ -58,7 +58,6 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
 
     _controller.forward();
 
-    // 2.5 second ke baad auto navigate karega PlannerScreen par
     Timer(const Duration(milliseconds: 2500), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -78,7 +77,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Dark Slate Theme
+      backgroundColor: const Color(0xFF0F172A),
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -87,7 +86,6 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Coach Authentic Circular Photo with Gold Border
                 Container(
                   width: 120,
                   height: 120,
@@ -108,8 +106,6 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Main Title
                 RichText(
                   text: const TextSpan(
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
@@ -130,8 +126,6 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Tagline & Handle
                 const Text(
                   "Smart Diet & Hypertrophy Workout Builder",
                   style: TextStyle(
@@ -157,10 +151,7 @@ class _WelcomeSplashScreenState extends State<WelcomeSplashScreen>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 48),
-
-                // Loader
                 const SizedBox(
                   width: 26,
                   height: 26,
