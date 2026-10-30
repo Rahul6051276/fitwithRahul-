@@ -1,16 +1,17 @@
-name: Build fitwithRahul APK
+name: Build and Release fitwithRahul APK
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch: # Sirf jab aap manually "Run workflow" click karenge tabhi chalega
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Release create karne ke liye zaroori permission
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -24,14 +25,22 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build APK (Release)
         run: flutter build apk --release
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release & Upload APK
+        uses: softprops/action-gh-release@v2
         with:
-          name: fitwithRahul-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          tag_name: v1.0.0-${{ github.run_number }}
+          name: fitwithRahul App v1.0.0 (Build #${{ github.run_number }})
+          body: |
+            ## fitwithRahul Official Release
+            - 3, 4, ya 5 Meal Flexible Diet Planner
+            - Built-in Food & Hypertrophy Workout Sheet
+            - WhatsApp PDF Sharing with @fitwithRahul Instagram link
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
