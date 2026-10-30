@@ -19,6 +19,9 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
   final TextEditingController _waterController = TextEditingController(text: "3.5 - 4 Liters");
   final TextEditingController _notesController = TextEditingController(text: "Creatine 3-5g daily. Progressive Overload prioritize karein.");
 
+  String _fitnessGoal = 'Fat Loss';
+  final List<String> _goalsList = ['Fat Loss', 'Muscle Gain', 'Body Recomp', 'Maintenance'];
+
   int _mealsCount = 3;
   int _activeMealIndex = 1;
   FiveMealPlan _plan = FiveMealPlan();
@@ -58,6 +61,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
 
     final clientPlan = SavedClientPlan(
       clientName: clientName,
+      fitnessGoal: _fitnessGoal,
       targetCalories: double.tryParse(_targetCalController.text) ?? 2000,
       waterIntake: _waterController.text,
       coachNotes: _notesController.text,
@@ -75,7 +79,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Plan saved successfully for $clientName!")),
+        SnackBar(content: Text("Plan saved successfully for $clientName ($_fitnessGoal)!")),
       );
     }
   }
@@ -116,6 +120,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                           final saved = SavedClientPlan.fromJson(jsonDecode(raw));
                           setState(() {
                             _clientNameController.text = saved.clientName;
+                            _fitnessGoal = saved.fitnessGoal;
                             _targetCalController.text = saved.targetCalories.toStringAsFixed(0);
                             _waterController.text = saved.waterIntake;
                             _notesController.text = saved.coachNotes;
@@ -134,7 +139,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- DIALOG: CREATE CUSTOM FOOD DIRECTLY IN APP ---
   void _showCreateFoodDialog(VoidCallback onDone) {
     final nameCtrl = TextEditingController();
     final calCtrl = TextEditingController();
@@ -150,7 +154,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Food Name (e.g. Sattu Drink)")),
+              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Food Name")),
               TextField(controller: calCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Calories per 100g")),
               TextField(controller: proCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Protein (g) per 100g")),
               TextField(controller: carbCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Carbs (g) per 100g")),
@@ -186,7 +190,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- DIALOG: CREATE CUSTOM EXERCISE DIRECTLY IN APP ---
   void _showCreateExerciseDialog(VoidCallback onDone) {
     final nameCtrl = TextEditingController();
     final setsCtrl = TextEditingController(text: "3");
@@ -486,6 +489,35 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                   ),
                 ],
               ),
+              const SizedBox(height: 10),
+              // FITNESS GOAL SELECTOR
+              Row(
+                children: [
+                  const Text("Goal: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _goalsList.map((g) {
+                          final isSelected = _fitnessGoal == g;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: ChoiceChip(
+                              label: Text(g, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                              selected: isSelected,
+                              selectedColor: const Color(0xFFF59E0B),
+                              onSelected: (val) {
+                                if (val) setState(() => _fitnessGoal = g);
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -578,53 +610,61 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                   child: Center(child: Text("Empty meal. Click '+ Add Food'.")),
                 )
               else
-                ...activeMealItems.map((entry) => Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            CircleAvatar(child: Icon(entry.food.icon, size: 18)),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(entry.food.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text("${entry.totalCalories.toStringAsFixed(0)} kcal (P:${entry.totalProtein.toStringAsFixed(0)}g C:${entry.totalCarbs.toStringAsFixed(0)}g F:${entry.totalFats.toStringAsFixed(0)}g)",
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                ],
-                              ),
+                ...activeMealItems.asMap().entries.map((entryMap) {
+                  final idx = entryMap.key;
+                  final entry = entryMap.value;
+                  return Card(
+                    key: ValueKey('meal_${_activeMealIndex}_item_${entry.food.id}_${entry.quantity}_$idx'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          CircleAvatar(child: Icon(entry.food.icon, size: 18)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(entry.food.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                  "${entry.totalCalories.toStringAsFixed(0)} kcal (P:${entry.totalProtein.toStringAsFixed(0)}g C:${entry.totalCarbs.toStringAsFixed(0)}g F:${entry.totalFats.toStringAsFixed(0)}g)",
+                                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                ),
+                              ],
                             ),
-                            SizedBox(
-                              width: 50,
-                              child: TextFormField(
-                                initialValue: entry.quantity.toStringAsFixed(0),
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(isDense: true),
-                                onChanged: (v) {
-                                  setState(() {
-                                    entry.quantity = double.tryParse(v) ?? entry.quantity;
-                                  });
-                                },
-                              ),
-                            ),
-                            DropdownButton<PortionUnit>(
-                              value: entry.unit,
-                              underline: const SizedBox(),
-                              items: PortionUnit.values.map((u) => DropdownMenuItem(value: u, child: Text(u.name))).toList(),
-                              onChanged: (u) {
-                                if (u != null) setState(() => entry.unit = u);
+                          ),
+                          SizedBox(
+                            width: 55,
+                            child: TextFormField(
+                              key: ValueKey('input_${entry.food.id}_${entry.quantity}'),
+                              initialValue: entry.quantity.toStringAsFixed(0),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(isDense: true),
+                              onChanged: (v) {
+                                setState(() {
+                                  entry.quantity = double.tryParse(v) ?? entry.quantity;
+                                });
                               },
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                              onPressed: () => setState(() => activeMealItems.remove(entry)),
-                            ),
-                          ],
-                        ),
+                          ),
+                          DropdownButton<PortionUnit>(
+                            value: entry.unit,
+                            underline: const SizedBox(),
+                            items: PortionUnit.values.map((u) => DropdownMenuItem(value: u, child: Text(u.name))).toList(),
+                            onChanged: (u) {
+                              if (u != null) setState(() => entry.unit = u);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                            onPressed: () => setState(() => activeMealItems.remove(entry)),
+                          ),
+                        ],
                       ),
-                    )),
+                    ),
+                  );
+                }),
             ],
           ),
 
@@ -679,47 +719,54 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                   ),
                 )
               else
-                ...activeDayWorkouts.map((ex) => Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(ex.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text("${ex.category} • Rest: ${ex.restSeconds}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                ],
-                              ),
+                ...activeDayWorkouts.asMap().entries.map((entryMap) {
+                  final idx = entryMap.key;
+                  final ex = entryMap.value;
+                  return Card(
+                    key: ValueKey('workout_${_activeWorkoutDay}_${ex.id}_$idx'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(ex.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text("${ex.category} • Rest: ${ex.restSeconds}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
                             ),
-                            SizedBox(
-                              width: 45,
-                              child: TextFormField(
-                                initialValue: ex.sets.toString(),
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(labelText: "Sets", isDense: true),
-                                onChanged: (v) => ex.sets = int.tryParse(v) ?? ex.sets,
-                              ),
+                          ),
+                          SizedBox(
+                            width: 45,
+                            child: TextFormField(
+                              key: ValueKey('ex_set_${ex.id}_${ex.sets}'),
+                              initialValue: ex.sets.toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(labelText: "Sets", isDense: true),
+                              onChanged: (v) => ex.sets = int.tryParse(v) ?? ex.sets,
                             ),
-                            const SizedBox(width: 6),
-                            SizedBox(
-                              width: 80,
-                              child: TextFormField(
-                                initialValue: ex.reps,
-                                decoration: const InputDecoration(labelText: "Reps/Dur", isDense: true),
-                                onChanged: (v) => ex.reps = v,
-                              ),
+                          ),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 80,
+                            child: TextFormField(
+                              key: ValueKey('ex_rep_${ex.id}_${ex.reps}'),
+                              initialValue: ex.reps,
+                              decoration: const InputDecoration(labelText: "Reps/Dur", isDense: true),
+                              onChanged: (v) => ex.reps = v,
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                              onPressed: () => setState(() => activeDayWorkouts.remove(ex)),
-                            ),
-                          ],
-                        ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                            onPressed: () => setState(() => activeDayWorkouts.remove(ex)),
+                          ),
+                        ],
                       ),
-                    )),
+                    ),
+                  );
+                }),
             ],
           ),
         ],
@@ -740,6 +787,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 onPressed: () async {
                   await PdfService.shareDietPdf(
                     clientName: _clientNameController.text.trim().isEmpty ? "Client" : _clientNameController.text.trim(),
+                    fitnessGoal: _fitnessGoal,
                     targetCalories: double.tryParse(_targetCalController.text) ?? 2000,
                     waterTarget: _waterController.text,
                     coachNotes: _notesController.text,
@@ -760,6 +808,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 onPressed: () async {
                   await PdfService.shareWorkoutPdf(
                     clientName: _clientNameController.text.trim().isEmpty ? "Client" : _clientNameController.text.trim(),
+                    fitnessGoal: _fitnessGoal,
                     coachNotes: _notesController.text,
                     routine: _weeklyRoutine,
                   );
