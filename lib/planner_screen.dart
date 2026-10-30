@@ -30,26 +30,44 @@ class _PlannerScreenState extends State<PlannerScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => FractionallySizedBox(
         heightFactor: 0.75,
-        child: ListView.builder(
-          itemCount: AppDataSheets.foodDatabase.length,
-          itemBuilder: (ctx, i) {
-            final food = AppDataSheets.foodDatabase[i];
-            return ListTile(
-              title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text("${food.servingUnit} | ${food.calories} kcal | P: ${food.protein}g"),
-              trailing: IconButton(
-                icon: const Icon(Icons.add_circle, color: Color(0xFFF59E0B)),
-                onPressed: () {
-                  setState(() {
-                    _plan.getMealList(_activeMealIndex).add(MealEntry(food: food, quantity: 1.0));
-                  });
-                  Navigator.pop(ctx);
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Text("Add Food to ${_titles[_activeMealIndex - 1]}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Divider(),
+            Expanded(
+              child: ListView.builder(
+                itemCount: AppDataSheets.foodDatabase.length,
+                itemBuilder: (ctx, i) {
+                  final food = AppDataSheets.foodDatabase[i];
+                  return ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+                      child: Text(food.iconEmoji, style: const TextStyle(fontSize: 22)),
+                    ),
+                    title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text("Per 100g: ${food.per100gCalories.toStringAsFixed(0)} kcal | P: ${food.per100gProtein}g"),
+                    trailing: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+                      onPressed: () {
+                        setState(() {
+                          _plan.getMealList(_activeMealIndex).add(MealEntry(food: food, grams: 100.0));
+                        });
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text("Add", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    ),
+                  );
                 },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -79,8 +97,8 @@ class _PlannerScreenState extends State<PlannerScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Total: ${_plan.grandCalories.toStringAsFixed(0)} kcal", style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold)),
-                Text("P: ${_plan.grandProtein.toStringAsFixed(0)}g | C: ${_plan.grandCarbs.toStringAsFixed(0)}g | F: ${_plan.grandFats.toStringAsFixed(0)}g", style: const TextStyle(color: Colors.white)),
+                Text("Total: ${_plan.grandCalories.toStringAsFixed(0)} kcal", style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 15)),
+                Text("P: ${_plan.grandProtein.toStringAsFixed(0)}g | C: ${_plan.grandCarbs.toStringAsFixed(0)}g | F: ${_plan.grandFats.toStringAsFixed(0)}g", style: const TextStyle(color: Colors.white, fontSize: 13)),
               ],
             ),
           ),
@@ -130,8 +148,13 @@ class _PlannerScreenState extends State<PlannerScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_titles[_activeMealIndex - 1], style: const TextStyle(fontWeight: FontWeight.bold)),
-                ElevatedButton.icon(onPressed: _openFoodSheet, icon: const Icon(Icons.add, size: 16), label: const Text("Add Food")),
+                Text(_titles[_activeMealIndex - 1], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ElevatedButton.icon(
+                  onPressed: _openFoodSheet,
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text("Add Food"),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B), foregroundColor: Colors.black),
+                ),
               ],
             ),
           ),
@@ -143,25 +166,62 @@ class _PlannerScreenState extends State<PlannerScreen> {
                     itemBuilder: (ctx, i) {
                       final item = currentItems[i];
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        child: ListTile(
-                          title: Text(item.food.name),
-                          subtitle: Text("${item.totalCalories.toStringAsFixed(0)} kcal | P: ${item.totalProtein.toStringAsFixed(1)}g"),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
+                        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove),
-                                onPressed: () => setState(() {
-                                  if (item.quantity > 0.5) {
-                                    item.quantity -= 0.5;
-                                  } else {
-                                    currentItems.removeAt(i);
-                                  }
-                                }),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 38,
+                                    height: 38,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+                                    child: Text(item.food.iconEmoji, style: const TextStyle(fontSize: 20)),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(item.food.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                        Text("Portion: ${item.grams.toStringAsFixed(0)} gm", style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                                      ],
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 20),
+                                        onPressed: () => setState(() {
+                                          if (item.grams > 25) {
+                                            item.grams -= 25;
+                                          } else {
+                                            currentItems.removeAt(i);
+                                          }
+                                        }),
+                                      ),
+                                      Text("${item.grams.toStringAsFixed(0)}g", style: const TextStyle(fontWeight: FontWeight.bold)),
+                                      IconButton(
+                                        icon: const Icon(Icons.add_circle_outline, color: Colors.green, size: 20),
+                                        onPressed: () => setState(() => item.grams += 25),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              Text("${item.quantity}x"),
-                              IconButton(icon: const Icon(Icons.add), onPressed: () => setState(() => item.quantity += 0.5)),
+                              const Divider(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("🔥 ${item.totalCalories.toStringAsFixed(0)} kcal", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD97706), fontSize: 12)),
+                                  Text("P: ${item.totalProtein.toStringAsFixed(1)}g", style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.blue, fontSize: 11)),
+                                  Text("C: ${item.totalCarbs.toStringAsFixed(1)}g", style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green, fontSize: 11)),
+                                  Text("F: ${item.totalFats.toStringAsFixed(1)}g", style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.redAccent, fontSize: 11)),
+                                ],
+                              ),
                             ],
                           ),
                         ),
