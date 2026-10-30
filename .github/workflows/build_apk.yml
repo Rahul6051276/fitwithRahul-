@@ -2,25 +2,26 @@ name: Build and Release fitwithRahul APK
 
 on:
   workflow_dispatch:
-
-permissions:
-  contents: write
+  push:
+    branches:
+      - main
 
 jobs:
   build:
+    name: Build Signed/Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Java (JDK 17)
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
@@ -32,14 +33,15 @@ jobs:
           # 1. Fresh Project banayega
           flutter create --org com.fitwithrahul --project-name fitwith_rahul fit_build_temp
           
-          # 2. Files copy
+          # 2. Files and Assets copy honge
           cp -r lib fit_build_temp/
+          cp -r assets fit_build_temp/
           cp pubspec.yaml fit_build_temp/pubspec.yaml
           
           # 3. Permissions inject
           sed -i '/<application/i <uses-permission android:name="android.permission.INTERNET" />\n<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />\n<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />' fit_build_temp/android/app/src/main/AndroidManifest.xml
           
-          # 4. Duplicate Class Fix (Exclude duplicate legacy kotlin modules)
+          # 4. Duplicate Class Fix
           cat << 'EOF' >> fit_build_temp/android/app/build.gradle
 
           configurations.all {
@@ -58,7 +60,7 @@ jobs:
           # 5. Build Run
           cd fit_build_temp
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release --no-tree-shake-icons
 
       - name: Prepare APK for Release
         run: |
@@ -72,9 +74,10 @@ jobs:
           name: fitwithRahul App v1.0.0 (Build #${{ github.run_number }})
           body: |
             ## fitwithRahul Official Release
-            * Gram-based (gm) Flexible Diet Planner
-            * Real-time Macros (Cal, Protein, Carbs, Fat) with Food Icons
-            * Hypertrophy Workout Protocol (10-12 Reps)
+            * Authentic Coach Profile Integration
+            * Unit-based Diet Planner (gm, tbsp, tsp, piece)
+            * Hypertrophy Workout Protocol (Sets/Reps/Rest)
+            * Client Local Save/History Persistence
             * Branded WhatsApp PDF Export (@fitwithRahul)
           files: release_apk/fitwithRahul-Release.apk
         env:
