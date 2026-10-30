@@ -25,34 +25,20 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      # Clean Android Engine generate karega aur SDK 34 + Kotlin 1.9.24 enforce karega
-      - name: Generate Android Skeleton & Fix Gradle Versions
+      - name: Setup Android Structure & Clean Gradle Config
         run: |
           rm -rf android
           flutter create --platforms=android --org=com.fitwithrahul --project-name=fitwith_rahul .
           
-          # Plugins ke compileSdkVersion ko 34 par force karna (lStar error fix)
-          cat << 'EOF' >> android/build.gradle
+          # Android SDK version 34 set karna app build.gradle me
+          sed -i -E 's/compileSdk = [0-9]+/compileSdk = 34/' android/app/build.gradle 2>/dev/null || true
+          sed -i -E 's/compileSdkVersion [0-9]+/compileSdkVersion 34/' android/app/build.gradle 2>/dev/null || true
+          sed -i -E 's/targetSdk = [0-9]+/targetSdk = 34/' android/app/build.gradle 2>/dev/null || true
+          sed -i -E 's/targetSdkVersion [0-9]+/targetSdkVersion 34/' android/app/build.gradle 2>/dev/null || true
 
-          subprojects {
-              afterEvaluate { project ->
-                  if (project.hasProperty('android')) {
-                      project.android {
-                          compileSdkVersion 34
-                          buildToolsVersion "34.0.0"
-                      }
-                  }
-              }
-          }
-          EOF
-
-          # Kotlin plugin version 1.9.24 set karna
+          # Kotlin version ko 1.9.24 align karna (declarative settings.gradle me)
           if [ -f android/settings.gradle ]; then
             sed -i -E 's/id "org.jetbrains.kotlin.android" version "[^"]+"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
-          fi
-
-          if [ -f android/build.gradle ]; then
-            sed -i -E "s/ext.kotlin_version = '[^']+'/ext.kotlin_version = '1.9.24'/" android/build.gradle
           fi
 
       - name: Install Dependencies
