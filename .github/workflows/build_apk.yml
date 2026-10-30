@@ -25,21 +25,29 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Setup Android Structure & Clean Gradle Config
+      - name: Configure Android Engine & Force SDK 34
         run: |
           rm -rf android
           flutter create --platforms=android --org=com.fitwithrahul --project-name=fitwith_rahul .
-          
-          # Android SDK version 34 set karna app build.gradle me
-          sed -i -E 's/compileSdk = [0-9]+/compileSdk = 34/' android/app/build.gradle 2>/dev/null || true
-          sed -i -E 's/compileSdkVersion [0-9]+/compileSdkVersion 34/' android/app/build.gradle 2>/dev/null || true
-          sed -i -E 's/targetSdk = [0-9]+/targetSdk = 34/' android/app/build.gradle 2>/dev/null || true
-          sed -i -E 's/targetSdkVersion [0-9]+/targetSdkVersion 34/' android/app/build.gradle 2>/dev/null || true
 
-          # Kotlin version ko 1.9.24 align karna (declarative settings.gradle me)
-          if [ -f android/settings.gradle ]; then
-            sed -i -E 's/id "org.jetbrains.kotlin.android" version "[^"]+"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
-          fi
+          # 1. Update Kotlin to 1.9.24 in settings.gradle
+          sed -i -E 's/id "org.jetbrains.kotlin.android" version "[^"]+"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
+
+          # 2. Fix subprojects compileSdk to 34 via gradle initialization hook
+          mkdir -p android/gradle/init.d
+          cat << 'EOF' > android/gradle/init.d/fix-sdk.gradle
+          allprojects {
+              afterEvaluate { project ->
+                  if (project.plugins.hasPlugin("com.android.application") ||
+                      project.plugins.hasPlugin("com.android.library")) {
+                      project.android {
+                          compileSdkVersion 34
+                          buildToolsVersion "34.0.0"
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: Install Dependencies
         run: flutter pub get
