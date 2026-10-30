@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -6,9 +7,9 @@ import 'package:share_plus/share_plus.dart';
 import 'models.dart';
 
 class PdfService {
-  static const PdfColor primaryDark = PdfColor.fromInt(0xFF1E293B);
+  static const PdfColor primaryDark = PdfColor.fromInt(0xFF0F172A);
+  static const PdfColor cardDark = PdfColor.fromInt(0xFF1E293B);
   static const PdfColor accentGold = PdfColor.fromInt(0xFFF59E0B);
-  static const PdfColor tableHeader = PdfColor.fromInt(0xFF0F172A);
   static const PdfColor lightRow = PdfColor.fromInt(0xFFF8FAFC);
 
   static Future<void> sharePdf({
@@ -20,6 +21,10 @@ class PdfService {
     required List<WorkoutExercise> workouts,
   }) async {
     final pdf = pw.Document();
+
+    // 1. Coach Photo Asset Load
+    final imageBytes = await rootBundle.load('assets/images/coach_rahul.png');
+    final coachImage = pw.MemoryImage(imageBytes.buffer.asUint8List());
 
     pw.Widget buildMealTable(String title, List<MealEntry> items) {
       if (items.isEmpty) return pw.SizedBox.shrink();
@@ -33,9 +38,9 @@ class PdfService {
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: primaryDark)),
+                pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: primaryDark)),
                 pw.Text("${items.fold(0.0, (s, i) => s + i.totalCalories).toStringAsFixed(0)} kcal",
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: primaryDark)),
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: primaryDark)),
               ],
             ),
           ),
@@ -49,13 +54,13 @@ class PdfService {
               "${i.totalCarbs.toStringAsFixed(1)}g",
               "${i.totalFats.toStringAsFixed(1)}g",
             ]).toList(),
-            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
-            headerDecoration: const pw.BoxDecoration(color: tableHeader),
-            cellStyle: const pw.TextStyle(fontSize: 8),
-            cellPadding: const pw.EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 7.5),
+            headerDecoration: const pw.BoxDecoration(color: primaryDark),
+            cellStyle: const pw.TextStyle(fontSize: 7.5),
+            cellPadding: const pw.EdgeInsets.symmetric(vertical: 2.5, horizontal: 5),
             oddRowDecoration: const pw.BoxDecoration(color: lightRow),
           ),
-          pw.SizedBox(height: 6),
+          pw.SizedBox(height: 5),
         ],
       );
     }
@@ -63,22 +68,41 @@ class PdfService {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(20),
+        margin: const pw.EdgeInsets.all(18),
         build: (pw.Context context) {
           return [
-            // Header
+            // Header Banner with Coach Authentic Circular Photo
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              decoration: pw.BoxDecoration(color: primaryDark, borderRadius: pw.BorderRadius.circular(6)),
+              decoration: pw.BoxDecoration(
+                color: cardDark,
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
               child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text("fitwithRahul", style: pw.TextStyle(color: accentGold, fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                      pw.Text("Certified Fitness & Nutrition Plan", style: const pw.TextStyle(color: PdfColors.white, fontSize: 8)),
-                    ],
+                  pw.Container(
+                    width: 52,
+                    height: 52,
+                    decoration: pw.BoxDecoration(
+                      shape: pw.BoxShape.circle,
+                      border: pw.Border.all(color: accentGold, width: 2),
+                    ),
+                    child: pw.ClipOval(
+                      child: pw.Image(coachImage, fit: pw.BoxFit.cover),
+                    ),
+                  ),
+                  pw.SizedBox(width: 12),
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text("fitwithRahul", style: pw.TextStyle(color: accentGold, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                        pw.Text("Coach Rahul | Certified Fitness & Nutrition", style: const pw.TextStyle(color: PdfColors.white, fontSize: 8.5)),
+                        pw.SizedBox(height: 2),
+                        pw.Text("Personalized Protocol: Hypertrophy & Nutrition", style: const pw.TextStyle(color: PdfColors.grey400, fontSize: 7.5)),
+                      ],
+                    ),
                   ),
                   pw.UrlLink(
                     destination: "https://www.instagram.com/fitwithRahul",
@@ -93,68 +117,68 @@ class PdfService {
             ),
             pw.SizedBox(height: 8),
 
-            // Client Info Box
+            // Client Info Card
             pw.Container(
-              padding: const pw.EdgeInsets.all(8),
+              padding: const pw.EdgeInsets.all(7),
               decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey300), borderRadius: pw.BorderRadius.circular(4)),
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text("Client: ${clientName.toUpperCase()}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                  pw.Text("CLIENT: ${clientName.toUpperCase()}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   pw.Text(
-                    "Total: ${plan.grandCalories.toStringAsFixed(0)} / ${targetCalories.toStringAsFixed(0)} kcal | P: ${plan.grandProtein.toStringAsFixed(0)}g | C: ${plan.grandCarbs.toStringAsFixed(0)}g | F: ${plan.grandFats.toStringAsFixed(0)}g",
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: primaryDark),
+                    "Target: ${plan.grandCalories.toStringAsFixed(0)} / ${targetCalories.toStringAsFixed(0)} kcal | P: ${plan.grandProtein.toStringAsFixed(0)}g | C: ${plan.grandCarbs.toStringAsFixed(0)}g | F: ${plan.grandFats.toStringAsFixed(0)}g",
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: cardDark),
                   ),
                 ],
               ),
             ),
             pw.SizedBox(height: 8),
 
-            // Diet Tables
+            // Meals Tables
             buildMealTable("MEAL 1: BREAKFAST", plan.meal1),
             buildMealTable("MEAL 2: MID-MORNING", plan.meal2),
             buildMealTable("MEAL 3: LUNCH", plan.meal3),
             buildMealTable("MEAL 4: EVENING SNACK", plan.meal4),
             buildMealTable("MEAL 5: DINNER", plan.meal5),
 
-            pw.SizedBox(height: 6),
+            pw.SizedBox(height: 5),
 
             // Workout Table
-            pw.Text("CUSTOM WORKOUT PROTOCOL", style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: primaryDark)),
-            pw.SizedBox(height: 4),
+            pw.Text("CUSTOM WORKOUT PROTOCOL", style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold, color: primaryDark)),
+            pw.SizedBox(height: 3),
             pw.TableHelper.fromTextArray(
               headers: ['Exercise', 'Category', 'Sets', 'Reps Target', 'Rest Time'],
               data: workouts.map((w) => [w.name, w.category, "${w.sets} Sets", w.reps, w.restSeconds]).toList(),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8),
-              headerDecoration: const pw.BoxDecoration(color: primaryDark),
-              cellStyle: const pw.TextStyle(fontSize: 8),
-              cellPadding: const pw.EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 7.5),
+              headerDecoration: const pw.BoxDecoration(color: cardDark),
+              cellStyle: const pw.TextStyle(fontSize: 7.5),
+              cellPadding: const pw.EdgeInsets.symmetric(vertical: 2.5, horizontal: 5),
             ),
-            pw.SizedBox(height: 8),
+            pw.SizedBox(height: 7),
 
-            // Daily Guidelines / Notes Box
+            // Water & Notes Section
             pw.Container(
-              padding: const pw.EdgeInsets.all(8),
+              padding: const pw.EdgeInsets.all(7),
               decoration: pw.BoxDecoration(color: PdfColor.fromInt(0xFFF1F5F9), borderRadius: pw.BorderRadius.circular(4)),
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text("COACH GUIDELINES & HYDRATION", style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: primaryDark)),
-                  pw.SizedBox(height: 3),
-                  pw.Text("💧 Daily Water Intake: $waterTarget", style: const pw.TextStyle(fontSize: 8)),
+                  pw.Text("COACH GUIDELINES & HYDRATION", style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: primaryDark)),
+                  pw.SizedBox(height: 2),
+                  pw.Text("Daily Water Intake: $waterTarget", style: const pw.TextStyle(fontSize: 7.5)),
                   if (coachNotes.isNotEmpty) ...[
                     pw.SizedBox(height: 2),
-                    pw.Text("📌 Notes / Supplements: $coachNotes", style: const pw.TextStyle(fontSize: 8)),
+                    pw.Text("Protocol Notes: $coachNotes", style: const pw.TextStyle(fontSize: 7.5)),
                   ],
                 ],
               ),
             ),
 
-            pw.SizedBox(height: 10),
+            pw.SizedBox(height: 8),
             pw.Center(
               child: pw.UrlLink(
                 destination: "https://www.instagram.com/fitwithRahul",
-                child: pw.Text("Created by fitwithRahul | Follow on Instagram: @fitwithRahul", style: pw.TextStyle(fontSize: 8, color: accentGold, fontWeight: pw.FontWeight.bold)),
+                child: pw.Text("Created by fitwithRahul | Follow on Instagram: @fitwithRahul", style: pw.TextStyle(fontSize: 7.5, color: accentGold, fontWeight: pw.FontWeight.bold)),
               ),
             ),
           ];
