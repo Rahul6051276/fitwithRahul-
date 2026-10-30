@@ -1,34 +1,73 @@
+import 'package:flutter/material.dart';
+
+// Serving unit enum
+enum PortionUnit { gm, tbsp, tsp, piece, scoop }
+
 class FoodItem {
   final String id;
   final String name;
-  final String iconEmoji; // Chhota logo/icon
+  final IconData icon;
   final double per100gCalories;
   final double per100gProtein;
   final double per100gCarbs;
   final double per100gFat;
+  final double tbspWeight; // 1 tbsp kitne gram ka hota hai
+  final double tspWeight;  // 1 tsp kitne gram ka hota hai
+  final double pieceWeight;// 1 piece/egg/scoop kitne gram ka hota hai
 
   const FoodItem({
     required this.id,
     required this.name,
-    required this.iconEmoji,
+    required this.icon,
     required this.per100gCalories,
     required this.per100gProtein,
     required this.per100gCarbs,
     required this.per100gFat,
+    this.tbspWeight = 15.0,
+    this.tspWeight = 5.0,
+    this.pieceWeight = 50.0,
   });
 }
 
 class MealEntry {
   final FoodItem food;
-  double grams; // Grams input (e.g., 50g, 100g)
+  double quantity;
+  PortionUnit unit;
 
-  MealEntry({required this.food, this.grams = 100.0});
+  MealEntry({
+    required this.food,
+    this.quantity = 100.0,
+    this.unit = PortionUnit.gm,
+  });
 
-  // Grams ke hisab se exact live macros calculation
-  double get totalCalories => (food.per100gCalories * grams) / 100.0;
-  double get totalProtein => (food.per100gProtein * grams) / 100.0;
-  double get totalCarbs => (food.per100gCarbs * grams) / 100.0;
-  double get totalFats => (food.per100gFat * grams) / 100.0;
+  // Selected Unit ke hisab se total gram nikalna
+  double get totalGrams {
+    switch (unit) {
+      case PortionUnit.gm:
+        return quantity;
+      case PortionUnit.tbsp:
+        return quantity * food.tbspWeight;
+      case PortionUnit.tsp:
+        return quantity * food.tspWeight;
+      case PortionUnit.piece:
+      case PortionUnit.scoop:
+        return quantity * food.pieceWeight;
+    }
+  }
+
+  // Exact automatic macros calculation
+  double get totalCalories => (food.per100gCalories * totalGrams) / 100.0;
+  double get totalProtein => (food.per100gProtein * totalGrams) / 100.0;
+  double get totalCarbs => (food.per100gCarbs * totalGrams) / 100.0;
+  double get totalFats => (food.per100gFat * totalGrams) / 100.0;
+
+  String get displayPortion {
+    String unitName = unit.name;
+    if (unit == PortionUnit.gm) {
+      return "${quantity.toStringAsFixed(0)} gm";
+    }
+    return "${quantity.toStringAsFixed(quantity % 1 == 0 ? 0 : 1)} $unitName (${totalGrams.toStringAsFixed(0)}g)";
+  }
 }
 
 class FiveMealPlan {
@@ -61,17 +100,19 @@ class FiveMealPlan {
 }
 
 class WorkoutExercise {
+  final String id;
   final String name;
-  final String targetMuscle;
-  final int sets;
-  final String reps;
-  final String restSeconds;
+  final String category;
+  int sets;
+  String reps;
+  String restSeconds;
 
   WorkoutExercise({
+    required this.id,
     required this.name,
-    required this.targetMuscle,
-    required this.sets,
-    required this.reps,
+    required this.category,
+    this.sets = 3,
+    this.reps = "10-12 reps",
     this.restSeconds = "60s",
   });
 }
