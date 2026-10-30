@@ -237,6 +237,7 @@ class WeeklyWorkoutRoutine {
 
 class SavedClientPlan {
   final String clientName;
+  final String fitnessGoal;
   final double targetCalories;
   final String waterIntake;
   final String coachNotes;
@@ -246,6 +247,7 @@ class SavedClientPlan {
 
   SavedClientPlan({
     required this.clientName,
+    this.fitnessGoal = 'Fat Loss',
     required this.targetCalories,
     required this.waterIntake,
     required this.coachNotes,
@@ -256,6 +258,7 @@ class SavedClientPlan {
 
   Map<String, dynamic> toJson() => {
         'clientName': clientName,
+        'fitnessGoal': fitnessGoal,
         'targetCal': targetCalories,
         'water': waterIntake,
         'notes': coachNotes,
@@ -266,6 +269,7 @@ class SavedClientPlan {
 
   factory SavedClientPlan.fromJson(Map<String, dynamic> json) => SavedClientPlan(
         clientName: json['clientName'] as String,
+        fitnessGoal: json['fitnessGoal'] as String? ?? 'Fat Loss',
         targetCalories: (json['targetCal'] as num).toDouble(),
         waterIntake: json['water'] as String? ?? "3.5 - 4 Liters",
         coachNotes: json['notes'] as String? ?? "",
