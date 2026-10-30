@@ -60,6 +60,7 @@ class PdfService {
   // ==========================================
   static Future<void> shareDietPdf({
     required String clientName,
+    required String fitnessGoal,
     required double targetCalories,
     required String waterTarget,
     required String coachNotes,
@@ -114,7 +115,7 @@ class PdfService {
         margin: const pw.EdgeInsets.all(18),
         build: (pw.Context context) {
           return [
-            _buildHeader(coachImage, "Personalized Nutrition & Diet Protocol"),
+            _buildHeader(coachImage, "Personalized Nutrition & Diet Protocol ($fitnessGoal)"),
             pw.SizedBox(height: 8),
             pw.Container(
               padding: const pw.EdgeInsets.all(7),
@@ -122,7 +123,7 @@ class PdfService {
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text("CLIENT: ${clientName.toUpperCase()}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                  pw.Text("CLIENT: ${clientName.toUpperCase()} [$fitnessGoal]", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   pw.Text(
                     "Cal: ${plan.grandCalories.toStringAsFixed(0)} / ${targetCalories.toStringAsFixed(0)} kcal | P: ${plan.grandProtein.toStringAsFixed(0)}g | C: ${plan.grandCarbs.toStringAsFixed(0)}g | F: ${plan.grandFats.toStringAsFixed(0)}g",
                     style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: cardDark),
@@ -139,7 +140,7 @@ class PdfService {
             pw.SizedBox(height: 8),
             pw.Container(
               padding: const pw.EdgeInsets.all(7),
-              decoration: pw.BoxDecoration(color: const PdfColor.fromInt(0xFFF1F5F9), borderRadius: pw.BorderRadius.circular(4)),
+              decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFF1F5F9), borderRadius: pw.BorderRadius.all(pw.Radius.circular(4))),
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
@@ -169,7 +170,7 @@ class PdfService {
 
     await Share.shareXFiles(
       [XFile(file.path)],
-      text: 'Namaste $clientName! Custom Diet Plan by Coach Rahul (@fitwithRahul).',
+      text: 'Namaste $clientName! Custom $fitnessGoal Diet Plan by Coach Rahul (@fitwithRahul).',
     );
   }
 
@@ -178,6 +179,7 @@ class PdfService {
   // ==========================================
   static Future<void> shareWorkoutPdf({
     required String clientName,
+    required String fitnessGoal,
     required String coachNotes,
     required WeeklyWorkoutRoutine routine,
   }) async {
@@ -228,7 +230,7 @@ class PdfService {
         margin: const pw.EdgeInsets.all(18),
         build: (pw.Context context) {
           return [
-            _buildHeader(coachImage, "Weekly Workout Split & Conditioning Protocol"),
+            _buildHeader(coachImage, "Weekly Workout Split ($fitnessGoal)"),
             pw.SizedBox(height: 8),
             pw.Container(
               padding: const pw.EdgeInsets.all(7),
@@ -237,7 +239,7 @@ class PdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text("CLIENT: ${clientName.toUpperCase()}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                  pw.Text("Weekly Split: Mon to Sat | Hypertrophy & HIIT", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: cardDark)),
+                  pw.Text("Goal: $fitnessGoal | Split: Mon to Sat", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8.5, color: cardDark)),
                 ],
               ),
             ),
@@ -251,7 +253,7 @@ class PdfService {
             pw.SizedBox(height: 4),
             pw.Container(
               padding: const pw.EdgeInsets.all(7),
-              decoration: pw.BoxDecoration(color: const PdfColor.fromInt(0xFFF1F5F9), borderRadius: pw.BorderRadius.circular(4)),
+              decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFF1F5F9), borderRadius: pw.BorderRadius.all(pw.Radius.circular(4))),
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
@@ -281,7 +283,7 @@ class PdfService {
 
     await Share.shareXFiles(
       [XFile(file.path)],
-      text: 'Namaste $clientName! Custom Weekly Workout Split by Coach Rahul (@fitwithRahul).',
+      text: 'Namaste $clientName! Custom $fitnessGoal Workout Split by Coach Rahul (@fitwithRahul).',
     );
   }
 }
