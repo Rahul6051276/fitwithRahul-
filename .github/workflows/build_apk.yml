@@ -25,18 +25,32 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      # Clean Android Engine generate karega aur Kotlin version 1.9.24 me set karega
-      - name: Setup Android & Update Kotlin Version
+      # Clean Android Engine generate karega aur SDK 34 + Kotlin 1.9.24 enforce karega
+      - name: Generate Android Skeleton & Fix Gradle Versions
         run: |
           rm -rf android
           flutter create --platforms=android --org=com.fitwithrahul --project-name=fitwith_rahul .
           
-          # settings.gradle me agar kotlin plugin hai toh 1.9.24 replace karega
+          # Plugins ke compileSdkVersion ko 34 par force karna (lStar error fix)
+          cat << 'EOF' >> android/build.gradle
+
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          compileSdkVersion 34
+                          buildToolsVersion "34.0.0"
+                      }
+                  }
+              }
+          }
+          EOF
+
+          # Kotlin plugin version 1.9.24 set karna
           if [ -f android/settings.gradle ]; then
             sed -i -E 's/id "org.jetbrains.kotlin.android" version "[^"]+"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
           fi
 
-          # build.gradle me agar ext.kotlin_version hai toh 1.9.24 replace karega
           if [ -f android/build.gradle ]; then
             sed -i -E "s/ext.kotlin_version = '[^']+'/ext.kotlin_version = '1.9.24'/" android/build.gradle
           fi
@@ -54,9 +68,9 @@ jobs:
           name: fitwithRahul App v1.0.0 (Build #${{ github.run_number }})
           body: |
             ## fitwithRahul Official Release
-            - 3, 4, ya 5 Meal Flexible Diet Planner
-            - Built-in Food & Hypertrophy Workout Protocol
-            - WhatsApp PDF Sharing with @fitwithRahul Instagram Link
+            - Gram-based (gm) Dynamic Diet Planner
+            - Auto Macro Calculation with Food Icons
+            - Branded WhatsApp PDF Export
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
