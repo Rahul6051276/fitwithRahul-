@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
-import 'food_data.dart';
+import 'database.dart';
 import 'pdf_service.dart';
 
 class PlannerScreen extends StatefulWidget {
@@ -126,6 +126,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
   }
 
   void _showAddFoodModal() {
+    final foods = AppDataSheets.foodDatabase;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -145,9 +146,9 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             Expanded(
               child: ListView.builder(
                 controller: scrollCtrl,
-                itemCount: defaultFoodDatabase.length,
+                itemCount: foods.length,
                 itemBuilder: (c, idx) {
-                  final food = defaultFoodDatabase[idx];
+                  final food = foods[idx];
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: const Color(0xFFFEF3C7),
@@ -184,7 +185,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
           final categories = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
-          final filtered = defaultExerciseDatabase.where((e) => e.category == _exerciseFilter).toList();
+          final filtered = AppDataSheets.exerciseMasterList.where((e) => e.category == _exerciseFilter).toList();
 
           return DraggableScrollableSheet(
             initialChildSize: 0.7,
