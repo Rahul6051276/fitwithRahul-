@@ -25,11 +25,21 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      # Purane conflicting android folder ko hata kar fresh generate karega
-      - name: Recreate Clean Android Platform Engine
+      # Clean Android Engine generate karega aur Kotlin version 1.9.24 me set karega
+      - name: Setup Android & Update Kotlin Version
         run: |
           rm -rf android
           flutter create --platforms=android --org=com.fitwithrahul --project-name=fitwith_rahul .
+          
+          # settings.gradle me agar kotlin plugin hai toh 1.9.24 replace karega
+          if [ -f android/settings.gradle ]; then
+            sed -i -E 's/id "org.jetbrains.kotlin.android" version "[^"]+"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
+          fi
+
+          # build.gradle me agar ext.kotlin_version hai toh 1.9.24 replace karega
+          if [ -f android/build.gradle ]; then
+            sed -i -E "s/ext.kotlin_version = '[^']+'/ext.kotlin_version = '1.9.24'/" android/build.gradle
+          fi
 
       - name: Install Dependencies
         run: flutter pub get
