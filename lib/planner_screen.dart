@@ -33,6 +33,12 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initCustomData();
+  }
+
+  Future<void> _initCustomData() async {
+    await AppDataSheets.loadCustomData();
+    if (mounted) setState(() {});
   }
 
   @override
@@ -128,53 +134,188 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
+  // --- DIALOG: CREATE CUSTOM FOOD DIRECTLY IN APP ---
+  void _showCreateFoodDialog(VoidCallback onDone) {
+    final nameCtrl = TextEditingController();
+    final calCtrl = TextEditingController();
+    final proCtrl = TextEditingController();
+    final carbCtrl = TextEditingController();
+    final fatCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Add New Food Item", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Food Name (e.g. Sattu Drink)")),
+              TextField(controller: calCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Calories per 100g")),
+              TextField(controller: proCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Protein (g) per 100g")),
+              TextField(controller: carbCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Carbs (g) per 100g")),
+              TextField(controller: fatCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Fats (g) per 100g")),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+            onPressed: () async {
+              final name = nameCtrl.text.trim();
+              if (name.isEmpty) return;
+              final newFood = FoodItem(
+                id: 'cust_${DateTime.now().millisecondsSinceEpoch}',
+                name: name,
+                icon: Icons.fastfood,
+                per100gCalories: double.tryParse(calCtrl.text) ?? 100,
+                per100gProtein: double.tryParse(proCtrl.text) ?? 0,
+                per100gCarbs: double.tryParse(carbCtrl.text) ?? 0,
+                per100gFat: double.tryParse(fatCtrl.text) ?? 0,
+              );
+              await AppDataSheets.addCustomFood(newFood);
+              Navigator.pop(ctx);
+              onDone();
+              setState(() {});
+            },
+            child: const Text("Save Food", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- DIALOG: CREATE CUSTOM EXERCISE DIRECTLY IN APP ---
+  void _showCreateExerciseDialog(VoidCallback onDone) {
+    final nameCtrl = TextEditingController();
+    final setsCtrl = TextEditingController(text: "3");
+    final repsCtrl = TextEditingController(text: "10-12 reps");
+    final restCtrl = TextEditingController(text: "60s");
+    String selectedCat = _exerciseFilter;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) => AlertDialog(
+          title: const Text("Add New Exercise", style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Exercise Name")),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedCat,
+                  decoration: const InputDecoration(labelText: "Category"),
+                  items: ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Cardio', 'Floor', 'HIIT', 'Core']
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setDlgState(() => selectedCat = v);
+                  },
+                ),
+                TextField(controller: setsCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Default Sets")),
+                TextField(controller: repsCtrl, decoration: const InputDecoration(labelText: "Default Reps / Duration")),
+                TextField(controller: restCtrl, decoration: const InputDecoration(labelText: "Rest Time")),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) return;
+                final newEx = WorkoutExercise(
+                  id: 'cust_ex_${DateTime.now().millisecondsSinceEpoch}',
+                  name: name,
+                  category: selectedCat,
+                  sets: int.tryParse(setsCtrl.text) ?? 3,
+                  reps: repsCtrl.text.trim().isEmpty ? "10-12 reps" : repsCtrl.text.trim(),
+                  restSeconds: restCtrl.text.trim().isEmpty ? "60s" : restCtrl.text.trim(),
+                );
+                await AppDataSheets.addCustomExercise(newEx);
+                Navigator.pop(ctx);
+                onDone();
+                setState(() {});
+              },
+              child: const Text("Save Exercise", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showAddFoodModal() {
-    final foods = AppDataSheets.foodDatabase;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        expand: false,
-        builder: (_, scrollCtrl) => Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("Select Food Item", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final foods = AppDataSheets.foodDatabase;
+          return DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            maxChildSize: 0.92,
+            minChildSize: 0.5,
+            expand: false,
+            builder: (_, scrollCtrl) => Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Select Food Item", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+                        icon: const Icon(Icons.add, size: 16, color: Colors.black),
+                        label: const Text("+ Custom Food", style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          _showCreateFoodDialog(() {
+                            setModalState(() {});
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollCtrl,
+                    itemCount: foods.length,
+                    itemBuilder: (c, idx) {
+                      final food = foods[idx];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: const Color(0xFFFEF3C7),
+                          child: Icon(food.icon, color: const Color(0xFFF59E0B)),
+                        ),
+                        title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: Text("${food.per100gCalories.toStringAsFixed(0)} kcal / 100g | P: ${food.per100gProtein}g | C: ${food.per100gCarbs}g | F: ${food.per100gFat}g"),
+                        trailing: ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E293B)),
+                          child: const Text("Add", style: TextStyle(color: Colors.white)),
+                          onPressed: () {
+                            setState(() {
+                              _plan.getMealList(_activeMealIndex).add(MealEntry(food: food));
+                            });
+                            Navigator.pop(ctx);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: ListView.builder(
-                controller: scrollCtrl,
-                itemCount: foods.length,
-                itemBuilder: (c, idx) {
-                  final food = foods[idx];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: const Color(0xFFFEF3C7),
-                      child: Icon(food.icon, color: const Color(0xFFF59E0B)),
-                    ),
-                    title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text("${food.per100gCalories.toStringAsFixed(0)} kcal / 100g | P: ${food.per100gProtein}g | C: ${food.per100gCarbs}g | F: ${food.per100gFat}g"),
-                    trailing: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E293B)),
-                      child: const Text("Add", style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        setState(() {
-                          _plan.getMealList(_activeMealIndex).add(MealEntry(food: food));
-                        });
-                        Navigator.pop(ctx);
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -197,9 +338,24 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             expand: false,
             builder: (_, scrollCtrl) => Column(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text("Select Exercises & Protocols", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Select Exercises", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+                        icon: const Icon(Icons.add, size: 16, color: Colors.black),
+                        label: const Text("+ Custom Exercise", style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          _showCreateExerciseDialog(() {
+                            setModalState(() {});
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -307,7 +463,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       body: TabBarView(
         controller: _tabController,
         children: [
-          // ================= DIET TAB =================
+          // DIET TAB
           ListView(
             padding: const EdgeInsets.all(12),
             children: [
@@ -472,7 +628,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             ],
           ),
 
-          // ================= WORKOUT TAB =================
+          // WORKOUT TAB
           ListView(
             padding: const EdgeInsets.all(12),
             children: [
