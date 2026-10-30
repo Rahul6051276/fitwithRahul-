@@ -38,10 +38,10 @@ class PdfService {
             ),
           ),
           pw.TableHelper.fromTextArray(
-            headers: ['Food Item', 'Portion', 'Calories', 'Protein', 'Carbs', 'Fats'],
+            headers: ['Food Item', 'Portion (gm)', 'Calories', 'Protein', 'Carbs', 'Fats'],
             data: items.map((i) => [
-              i.food.name,
-              "${i.quantity}x ${i.food.servingUnit}",
+              "${i.food.iconEmoji} ${i.food.name}",
+              "${i.grams.toStringAsFixed(0)} gm",
               "${i.totalCalories.toStringAsFixed(0)} kcal",
               "${i.totalProtein.toStringAsFixed(1)}g",
               "${i.totalCarbs.toStringAsFixed(1)}g",
@@ -64,6 +64,7 @@ class PdfService {
         margin: const pw.EdgeInsets.all(20),
         build: (pw.Context context) {
           return [
+            // Header with Instagram Link
             pw.Container(
               padding: const pw.EdgeInsets.all(12),
               decoration: pw.BoxDecoration(color: primaryDark, borderRadius: pw.BorderRadius.circular(6)),
@@ -89,6 +90,8 @@ class PdfService {
               ),
             ),
             pw.SizedBox(height: 10),
+
+            // Client Info Box
             pw.Container(
               padding: const pw.EdgeInsets.all(8),
               decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey300), borderRadius: pw.BorderRadius.circular(4)),
@@ -104,11 +107,14 @@ class PdfService {
               ),
             ),
             pw.SizedBox(height: 10),
+
+            // Populated meals list
             buildMealTable("MEAL 1: BREAKFAST", plan.meal1),
             buildMealTable("MEAL 2: MID-MORNING", plan.meal2),
             buildMealTable("MEAL 3: LUNCH", plan.meal3),
             buildMealTable("MEAL 4: EVENING SNACK", plan.meal4),
             buildMealTable("MEAL 5: DINNER", plan.meal5),
+
             pw.SizedBox(height: 6),
             pw.Text("WORKOUT PROTOCOL", style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: primaryDark)),
             pw.SizedBox(height: 4),
