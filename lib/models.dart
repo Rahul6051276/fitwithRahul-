@@ -1,33 +1,34 @@
 class FoodItem {
   final String id;
   final String name;
-  final String servingUnit;
-  final double calories;
-  final double protein;
-  final double carbs;
-  final double fats;
+  final String iconEmoji; // Chhota logo/icon
+  final double per100gCalories;
+  final double per100gProtein;
+  final double per100gCarbs;
+  final double per100gFat;
 
   const FoodItem({
     required this.id,
     required this.name,
-    required this.servingUnit,
-    required this.calories,
-    required this.protein,
-    required this.carbs,
-    required this.fats,
+    required this.iconEmoji,
+    required this.per100gCalories,
+    required this.per100gProtein,
+    required this.per100gCarbs,
+    required this.per100gFat,
   });
 }
 
 class MealEntry {
   final FoodItem food;
-  double quantity;
+  double grams; // Grams input (e.g., 50g, 100g)
 
-  MealEntry({required this.food, this.quantity = 1.0});
+  MealEntry({required this.food, this.grams = 100.0});
 
-  double get totalCalories => food.calories * quantity;
-  double get totalProtein => food.protein * quantity;
-  double get totalCarbs => food.carbs * quantity;
-  double get totalFats => food.fats * quantity;
+  // Grams ke hisab se exact live macros calculation
+  double get totalCalories => (food.per100gCalories * grams) / 100.0;
+  double get totalProtein => (food.per100gProtein * grams) / 100.0;
+  double get totalCarbs => (food.per100gCarbs * grams) / 100.0;
+  double get totalFats => (food.per100gFat * grams) / 100.0;
 }
 
 class FiveMealPlan {
