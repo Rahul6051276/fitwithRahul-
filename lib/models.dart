@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Serving unit enum
 enum PortionUnit { gm, tbsp, tsp, piece, scoop }
 
 class FoodItem {
@@ -11,9 +10,9 @@ class FoodItem {
   final double per100gProtein;
   final double per100gCarbs;
   final double per100gFat;
-  final double tbspWeight; // 1 tbsp kitne gram ka hota hai
-  final double tspWeight;  // 1 tsp kitne gram ka hota hai
-  final double pieceWeight;// 1 piece/egg/scoop kitne gram ka hota hai
+  final double tbspWeight;
+  final double tspWeight;
+  final double pieceWeight;
 
   const FoodItem({
     required this.id,
@@ -27,6 +26,32 @@ class FoodItem {
     this.tspWeight = 5.0,
     this.pieceWeight = 50.0,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'iconCode': icon.codePoint,
+        'cal': per100gCalories,
+        'pro': per100gProtein,
+        'carb': per100gCarbs,
+        'fat': per100gFat,
+        'tbsp': tbspWeight,
+        'tsp': tspWeight,
+        'piece': pieceWeight,
+      };
+
+  factory FoodItem.fromJson(Map<String, dynamic> json) => FoodItem(
+        id: json['id'],
+        name: json['name'],
+        icon: IconData(json['iconCode'] ?? 0xe25a, fontFamily: 'MaterialIcons'),
+        per100gCalories: (json['cal'] as num).toDouble(),
+        per100gProtein: (json['pro'] as num).toDouble(),
+        per100gCarbs: (json['carb'] as num).toDouble(),
+        per100gFat: (json['fat'] as num).toDouble(),
+        tbspWeight: (json['tbsp'] as num?)?.toDouble() ?? 15.0,
+        tspWeight: (json['tsp'] as num?)?.toDouble() ?? 5.0,
+        pieceWeight: (json['piece'] as num?)?.toDouble() ?? 50.0,
+      );
 }
 
 class MealEntry {
@@ -40,7 +65,6 @@ class MealEntry {
     this.unit = PortionUnit.gm,
   });
 
-  // Selected Unit ke hisab se total gram nikalna
   double get totalGrams {
     switch (unit) {
       case PortionUnit.gm:
@@ -55,7 +79,6 @@ class MealEntry {
     }
   }
 
-  // Exact automatic macros calculation
   double get totalCalories => (food.per100gCalories * totalGrams) / 100.0;
   double get totalProtein => (food.per100gProtein * totalGrams) / 100.0;
   double get totalCarbs => (food.per100gCarbs * totalGrams) / 100.0;
@@ -68,6 +91,21 @@ class MealEntry {
     }
     return "${quantity.toStringAsFixed(quantity % 1 == 0 ? 0 : 1)} $unitName (${totalGrams.toStringAsFixed(0)}g)";
   }
+
+  Map<String, dynamic> toJson() => {
+        'food': food.toJson(),
+        'qty': quantity,
+        'unit': unit.name,
+      };
+
+  factory MealEntry.fromJson(Map<String, dynamic> json) => MealEntry(
+        food: FoodItem.fromJson(json['food']),
+        quantity: (json['qty'] as num).toDouble(),
+        unit: PortionUnit.values.firstWhere(
+          (u) => u.name == json['unit'],
+          orElse: () => PortionUnit.gm,
+        ),
+      );
 }
 
 class FiveMealPlan {
@@ -79,12 +117,18 @@ class FiveMealPlan {
 
   List<MealEntry> getMealList(int index) {
     switch (index) {
-      case 1: return meal1;
-      case 2: return meal2;
-      case 3: return meal3;
-      case 4: return meal4;
-      case 5: return meal5;
-      default: return meal1;
+      case 1:
+        return meal1;
+      case 2:
+        return meal2;
+      case 3:
+        return meal3;
+      case 4:
+        return meal4;
+      case 5:
+        return meal5;
+      default:
+        return meal1;
     }
   }
 
@@ -97,6 +141,24 @@ class FiveMealPlan {
   double _sumP(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalProtein);
   double _sumC(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalCarbs);
   double _sumF(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalFats);
+
+  Map<String, dynamic> toJson() => {
+        'm1': meal1.map((e) => e.toJson()).toList(),
+        'm2': meal2.map((e) => e.toJson()).toList(),
+        'm3': meal3.map((e) => e.toJson()).toList(),
+        'm4': meal4.map((e) => e.toJson()).toList(),
+        'm5': meal5.map((e) => e.toJson()).toList(),
+      };
+
+  factory FiveMealPlan.fromJson(Map<String, dynamic> json) {
+    final p = FiveMealPlan();
+    if (json['m1'] != null) p.meal1 = (json['m1'] as List).map((e) => MealEntry.fromJson(e)).toList();
+    if (json['m2'] != null) p.meal2 = (json['m2'] as List).map((e) => MealEntry.fromJson(e)).toList();
+    if (json['m3'] != null) p.meal3 = (json['m3'] as List).map((e) => MealEntry.fromJson(e)).toList();
+    if (json['m4'] != null) p.meal4 = (json['m4'] as List).map((e) => MealEntry.fromJson(e)).toList();
+    if (json['m5'] != null) p.meal5 = (json['m5'] as List).map((e) => MealEntry.fromJson(e)).toList();
+    return p;
+  }
 }
 
 class WorkoutExercise {
@@ -115,4 +177,62 @@ class WorkoutExercise {
     this.reps = "10-12 reps",
     this.restSeconds = "60s",
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'cat': category,
+        'sets': sets,
+        'reps': reps,
+        'rest': restSeconds,
+      };
+
+  factory WorkoutExercise.fromJson(Map<String, dynamic> json) => WorkoutExercise(
+        id: json['id'],
+        name: json['name'],
+        category: json['cat'],
+        sets: json['sets'] ?? 3,
+        reps: json['reps'] ?? "10-12 reps",
+        restSeconds: json['rest'] ?? "60s",
+      );
+}
+
+class SavedClientPlan {
+  final String clientName;
+  final double targetCalories;
+  final String waterIntake;
+  final String coachNotes;
+  final int totalMeals;
+  final FiveMealPlan plan;
+  final List<WorkoutExercise> workouts;
+
+  SavedClientPlan({
+    required this.clientName,
+    required this.targetCalories,
+    required this.waterIntake,
+    required this.coachNotes,
+    required this.totalMeals,
+    required this.plan,
+    required this.workouts,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'clientName': clientName,
+        'targetCal': targetCalories,
+        'water': waterIntake,
+        'notes': coachNotes,
+        'totalMeals': totalMeals,
+        'plan': plan.toJson(),
+        'workouts': workouts.map((w) => w.toJson()).toList(),
+      };
+
+  factory SavedClientPlan.fromJson(Map<String, dynamic> json) => SavedClientPlan(
+        clientName: json['clientName'],
+        targetCalories: (json['targetCal'] as num).toDouble(),
+        waterIntake: json['water'] ?? "3.5 - 4 Liters",
+        coachNotes: json['notes'] ?? "",
+        totalMeals: json['totalMeals'] ?? 3,
+        plan: FiveMealPlan.fromJson(json['plan']),
+        workouts: (json['workouts'] as List).map((w) => WorkoutExercise.fromJson(w)).toList(),
+      );
 }
