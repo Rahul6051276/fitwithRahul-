@@ -1,5 +1,5 @@
 name: fitwith_rahul
-description: "Smart Diet and Workout Plan Builder"
+description: "Professional Diet and Hypertrophy Workout Builder by Coach Rahul"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,16 +9,23 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.3.3
   pdf: ^3.11.3
   printing: ^5.13.1
-  share_plus: ^9.0.0
   path_provider: ^2.1.5
-  shared_preferences: ^2.2.3
+  share_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/coach_rahul.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true
