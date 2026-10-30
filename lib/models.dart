@@ -41,9 +41,9 @@ class FoodItem {
       };
 
   factory FoodItem.fromJson(Map<String, dynamic> json) => FoodItem(
-        id: json['id'],
-        name: json['name'],
-        icon: IconData(json['iconCode'] ?? 0xe25a, fontFamily: 'MaterialIcons'),
+        id: json['id'] as String,
+        name: json['name'] as String,
+        icon: IconData(json['iconCode'] as int? ?? 0xe25a, fontFamily: 'MaterialIcons'),
         per100gCalories: (json['cal'] as num).toDouble(),
         per100gProtein: (json['pro'] as num).toDouble(),
         per100gCarbs: (json['carb'] as num).toDouble(),
@@ -99,7 +99,7 @@ class MealEntry {
       };
 
   factory MealEntry.fromJson(Map<String, dynamic> json) => MealEntry(
-        food: FoodItem.fromJson(json['food']),
+        food: FoodItem.fromJson(json['food'] as Map<String, dynamic>),
         quantity: (json['qty'] as num).toDouble(),
         unit: PortionUnit.values.firstWhere(
           (u) => u.name == json['unit'],
@@ -109,11 +109,24 @@ class MealEntry {
 }
 
 class FiveMealPlan {
-  List<MealEntry> meal1 = [];
-  List<MealEntry> meal2 = [];
-  List<MealEntry> meal3 = [];
-  List<MealEntry> meal4 = [];
-  List<MealEntry> meal5 = [];
+  List<MealEntry> meal1;
+  List<MealEntry> meal2;
+  List<MealEntry> meal3;
+  List<MealEntry> meal4;
+  List<MealEntry> meal5;
+
+  // Explicit Constructor
+  FiveMealPlan({
+    List<MealEntry>? meal1,
+    List<MealEntry>? meal2,
+    List<MealEntry>? meal3,
+    List<MealEntry>? meal4,
+    List<MealEntry>? meal5,
+  })  : meal1 = meal1 ?? [],
+        meal2 = meal2 ?? [],
+        meal3 = meal3 ?? [],
+        meal4 = meal4 ?? [],
+        meal5 = meal5 ?? [];
 
   List<MealEntry> getMealList(int index) {
     switch (index) {
@@ -137,10 +150,10 @@ class FiveMealPlan {
   double get grandCarbs => _sumC(meal1) + _sumC(meal2) + _sumC(meal3) + _sumC(meal4) + _sumC(meal5);
   double get grandFats => _sumF(meal1) + _sumF(meal2) + _sumF(meal3) + _sumF(meal4) + _sumF(meal5);
 
-  double _sum(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalCalories);
-  double _sumP(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalProtein);
-  double _sumC(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalCarbs);
-  double _sumF(List<MealEntry> l) => l.fold(0, (s, i) => s + i.totalFats);
+  double _sum(List<MealEntry> l) => l.fold(0.0, (s, i) => s + i.totalCalories);
+  double _sumP(List<MealEntry> l) => l.fold(0.0, (s, i) => s + i.totalProtein);
+  double _sumC(List<MealEntry> l) => l.fold(0.0, (s, i) => s + i.totalCarbs);
+  double _sumF(List<MealEntry> l) => l.fold(0.0, (s, i) => s + i.totalFats);
 
   Map<String, dynamic> toJson() => {
         'm1': meal1.map((e) => e.toJson()).toList(),
@@ -150,15 +163,13 @@ class FiveMealPlan {
         'm5': meal5.map((e) => e.toJson()).toList(),
       };
 
-  factory FiveMealPlan.fromJson(Map<String, dynamic> json) {
-    final p = FiveMealPlan();
-    if (json['m1'] != null) p.meal1 = (json['m1'] as List).map((e) => MealEntry.fromJson(e)).toList();
-    if (json['m2'] != null) p.meal2 = (json['m2'] as List).map((e) => MealEntry.fromJson(e)).toList();
-    if (json['m3'] != null) p.meal3 = (json['m3'] as List).map((e) => MealEntry.fromJson(e)).toList();
-    if (json['m4'] != null) p.meal4 = (json['m4'] as List).map((e) => MealEntry.fromJson(e)).toList();
-    if (json['m5'] != null) p.meal5 = (json['m5'] as List).map((e) => MealEntry.fromJson(e)).toList();
-    return p;
-  }
+  factory FiveMealPlan.fromJson(Map<String, dynamic> json) => FiveMealPlan(
+        meal1: json['m1'] != null ? (json['m1'] as List).map((e) => MealEntry.fromJson(e as Map<String, dynamic>)).toList() : [],
+        meal2: json['m2'] != null ? (json['m2'] as List).map((e) => MealEntry.fromJson(e as Map<String, dynamic>)).toList() : [],
+        meal3: json['m3'] != null ? (json['m3'] as List).map((e) => MealEntry.fromJson(e as Map<String, dynamic>)).toList() : [],
+        meal4: json['m4'] != null ? (json['m4'] as List).map((e) => MealEntry.fromJson(e as Map<String, dynamic>)).toList() : [],
+        meal5: json['m5'] != null ? (json['m5'] as List).map((e) => MealEntry.fromJson(e as Map<String, dynamic>)).toList() : [],
+      );
 }
 
 class WorkoutExercise {
@@ -188,12 +199,12 @@ class WorkoutExercise {
       };
 
   factory WorkoutExercise.fromJson(Map<String, dynamic> json) => WorkoutExercise(
-        id: json['id'],
-        name: json['name'],
-        category: json['cat'],
-        sets: json['sets'] ?? 3,
-        reps: json['reps'] ?? "10-12 reps",
-        restSeconds: json['rest'] ?? "60s",
+        id: json['id'] as String,
+        name: json['name'] as String,
+        category: json['cat'] as String,
+        sets: (json['sets'] as num?)?.toInt() ?? 3,
+        reps: json['reps'] as String? ?? "10-12 reps",
+        restSeconds: json['rest'] as String? ?? "60s",
       );
 }
 
@@ -227,12 +238,12 @@ class SavedClientPlan {
       };
 
   factory SavedClientPlan.fromJson(Map<String, dynamic> json) => SavedClientPlan(
-        clientName: json['clientName'],
+        clientName: json['clientName'] as String,
         targetCalories: (json['targetCal'] as num).toDouble(),
-        waterIntake: json['water'] ?? "3.5 - 4 Liters",
-        coachNotes: json['notes'] ?? "",
-        totalMeals: json['totalMeals'] ?? 3,
-        plan: FiveMealPlan.fromJson(json['plan']),
-        workouts: (json['workouts'] as List).map((w) => WorkoutExercise.fromJson(w)).toList(),
+        waterIntake: json['water'] as String? ?? "3.5 - 4 Liters",
+        coachNotes: json['notes'] as String? ?? "",
+        totalMeals: (json['totalMeals'] as num?)?.toInt() ?? 3,
+        plan: FiveMealPlan.fromJson(json['plan'] as Map<String, dynamic>),
+        workouts: (json['workouts'] as List).map((w) => WorkoutExercise.fromJson(w as Map<String, dynamic>)).toList(),
       );
 }
