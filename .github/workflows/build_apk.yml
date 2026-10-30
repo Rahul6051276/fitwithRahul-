@@ -30,20 +30,14 @@ jobs:
 
       - name: Setup & Build fitwithRahul App
         run: |
-          # 1. Fresh Project banayega
           flutter create --org com.fitwithrahul --project-name fitwith_rahul fit_build_temp
-          
-          # 2. Files and Assets copy honge
           cp -r lib fit_build_temp/
           cp -r assets fit_build_temp/
           cp pubspec.yaml fit_build_temp/pubspec.yaml
           
-          # 3. Permissions inject
           sed -i '/<application/i <uses-permission android:name="android.permission.INTERNET" />\n<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />\n<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />' fit_build_temp/android/app/src/main/AndroidManifest.xml
           
-          # 4. Duplicate Class Fix
           cat << 'EOF' >> fit_build_temp/android/app/build.gradle
-
           configurations.all {
               resolutionStrategy {
                   eachDependency { DependencyResolveDetails details ->
@@ -57,9 +51,9 @@ jobs:
           }
           EOF
 
-          # 5. Build Run
           cd fit_build_temp
           flutter pub get
+          flutter pub run flutter_launcher_icons
           flutter build apk --release --no-tree-shake-icons
 
       - name: Prepare APK for Release
