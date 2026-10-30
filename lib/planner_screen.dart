@@ -17,12 +17,15 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
   final TextEditingController _clientNameController = TextEditingController(text: "Client");
   final TextEditingController _targetCalController = TextEditingController(text: "2000");
   final TextEditingController _waterController = TextEditingController(text: "3.5 - 4 Liters");
-  final TextEditingController _notesController = TextEditingController(text: "Creatine 3-5g post-workout. Sleep 7-8 hours.");
+  final TextEditingController _notesController = TextEditingController(text: "Creatine 3-5g daily. Progressive Overload prioritize karein.");
 
   int _mealsCount = 3;
   int _activeMealIndex = 1;
   FiveMealPlan _plan = FiveMealPlan();
-  List<WorkoutExercise> _selectedWorkouts = [];
+
+  String _activeWorkoutDay = 'Monday';
+  final List<String> _weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  WeeklyWorkoutRoutine _weeklyRoutine = WeeklyWorkoutRoutine();
 
   String _exerciseFilter = 'Chest';
 
@@ -54,7 +57,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       coachNotes: _notesController.text,
       totalMeals: _mealsCount,
       plan: _plan,
-      workouts: _selectedWorkouts,
+      weeklyWorkout: _weeklyRoutine,
     );
 
     await prefs.setString('plan_$clientName', jsonEncode(clientPlan.toJson()));
@@ -112,7 +115,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                             _notesController.text = saved.coachNotes;
                             _mealsCount = saved.totalMeals;
                             _plan = saved.plan;
-                            _selectedWorkouts = saved.workouts;
+                            _weeklyRoutine = saved.weeklyWorkout;
                           });
                         }
                         Navigator.pop(ctx);
@@ -184,19 +187,19 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
-          final categories = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
+          final categories = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Cardio', 'Floor', 'HIIT', 'Core'];
           final filtered = AppDataSheets.exerciseMasterList.where((e) => e.category == _exerciseFilter).toList();
 
           return DraggableScrollableSheet(
-            initialChildSize: 0.7,
-            maxChildSize: 0.9,
+            initialChildSize: 0.75,
+            maxChildSize: 0.92,
             minChildSize: 0.5,
             expand: false,
             builder: (_, scrollCtrl) => Column(
               children: [
                 const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text("Select Workout Exercises", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Text("Select Exercises & Protocols", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -229,18 +232,25 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                     itemBuilder: (c, idx) {
                       final ex = filtered[idx];
                       return ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Color(0xFFE2E8F0),
-                          child: Icon(Icons.fitness_center, color: Color(0xFF1E293B)),
+                        leading: CircleAvatar(
+                          backgroundColor: const Color(0xFFE2E8F0),
+                          child: Icon(
+                            ex.category == 'Cardio'
+                                ? Icons.directions_run
+                                : ex.category == 'HIIT'
+                                    ? Icons.bolt
+                                    : Icons.fitness_center,
+                            color: const Color(0xFF1E293B),
+                          ),
                         ),
                         title: Text(ex.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text("Default: ${ex.sets} Sets • ${ex.reps}"),
+                        subtitle: Text("Target: ${ex.sets} Sets • ${ex.reps} • Rest: ${ex.restSeconds}"),
                         trailing: ElevatedButton(
                           style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E293B)),
                           child: const Text("Add", style: TextStyle(color: Colors.white)),
                           onPressed: () {
                             setState(() {
-                              _selectedWorkouts.add(WorkoutExercise(
+                              _weeklyRoutine.days[_activeWorkoutDay]!.add(WorkoutExercise(
                                 id: ex.id,
                                 name: ex.name,
                                 category: ex.category,
@@ -267,6 +277,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final activeMealItems = _plan.getMealList(_activeMealIndex);
+    final activeDayWorkouts = _weeklyRoutine.days[_activeWorkoutDay] ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -289,14 +300,14 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           unselectedLabelColor: Colors.grey,
           tabs: const [
             Tab(icon: Icon(Icons.restaurant_menu), text: "DIET PLAN"),
-            Tab(icon: Icon(Icons.fitness_center), text: "WORKOUT PLAN"),
+            Tab(icon: Icon(Icons.calendar_month), text: "WEEKLY WORKOUT"),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          // DIET TAB
+          // ================= DIET TAB =================
           ListView(
             padding: const EdgeInsets.all(12),
             children: [
@@ -461,30 +472,58 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             ],
           ),
 
-          // WORKOUT TAB
+          // ================= WORKOUT TAB =================
           ListView(
             padding: const EdgeInsets.all(12),
             children: [
+              const Text("Select Training Day:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _weekDays.map((day) {
+                    final count = _weeklyRoutine.days[day]?.length ?? 0;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: ChoiceChip(
+                        label: Text("$day ($count)"),
+                        selected: _activeWorkoutDay == day,
+                        selectedColor: const Color(0xFFF59E0B),
+                        onSelected: (val) {
+                          if (val) setState(() => _activeWorkoutDay = day);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const Divider(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Hypertrophy Routine", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text("$_activeWorkoutDay Protocol", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
                     icon: const Icon(Icons.add, color: Colors.black),
-                    label: const Text("Add Exercise", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    label: const Text("Add Workout", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                     onPressed: _showAddWorkoutModal,
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              if (_selectedWorkouts.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Center(child: Text("No exercises added. Click '+ Add Exercise'.")),
+              if (activeDayWorkouts.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Center(
+                    child: Text(
+                      "No exercises added for $_activeWorkoutDay.\nTap '+ Add Workout' to add weights, cardio, or HIIT.",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
                 )
               else
-                ..._selectedWorkouts.map((ex) => Card(
+                ...activeDayWorkouts.map((ex) => Card(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
@@ -495,7 +534,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(ex.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text(ex.category, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                  Text("${ex.category} • Rest: ${ex.restSeconds}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
                                 ],
                               ),
                             ),
@@ -510,16 +549,16 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                             ),
                             const SizedBox(width: 6),
                             SizedBox(
-                              width: 75,
+                              width: 80,
                               child: TextFormField(
                                 initialValue: ex.reps,
-                                decoration: const InputDecoration(labelText: "Reps", isDense: true),
+                                decoration: const InputDecoration(labelText: "Reps/Dur", isDense: true),
                                 onChanged: (v) => ex.reps = v,
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                              onPressed: () => setState(() => _selectedWorkouts.remove(ex)),
+                              onPressed: () => setState(() => activeDayWorkouts.remove(ex)),
                             ),
                           ],
                         ),
@@ -530,25 +569,48 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ],
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         color: Colors.white,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF10B981),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          icon: const Icon(Icons.share, color: Colors.white),
-          label: const Text("Share Plan to WhatsApp", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          onPressed: () async {
-            await PdfService.sharePdf(
-              clientName: _clientNameController.text.trim().isEmpty ? "Client" : _clientNameController.text.trim(),
-              targetCalories: double.tryParse(_targetCalController.text) ?? 2000,
-              waterTarget: _waterController.text,
-              coachNotes: _notesController.text,
-              plan: _plan,
-              workouts: _selectedWorkouts,
-            );
-          },
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                icon: const Icon(Icons.restaurant, color: Colors.white, size: 18),
+                label: const Text("Share Diet PDF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                onPressed: () async {
+                  await PdfService.shareDietPdf(
+                    clientName: _clientNameController.text.trim().isEmpty ? "Client" : _clientNameController.text.trim(),
+                    targetCalories: double.tryParse(_targetCalController.text) ?? 2000,
+                    waterTarget: _waterController.text,
+                    coachNotes: _notesController.text,
+                    plan: _plan,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0284C7),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                icon: const Icon(Icons.fitness_center, color: Colors.white, size: 18),
+                label: const Text("Share Workout PDF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                onPressed: () async {
+                  await PdfService.shareWorkoutPdf(
+                    clientName: _clientNameController.text.trim().isEmpty ? "Client" : _clientNameController.text.trim(),
+                    coachNotes: _notesController.text,
+                    routine: _weeklyRoutine,
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
