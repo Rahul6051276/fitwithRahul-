@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 
 class AppDataSheets {
-  static final List<FoodItem> foodDatabase = [
-    // PROTEINS & DAIRY
+  // Built-in Static Foods
+  static final List<FoodItem> initialFoodDatabase = [
     const FoodItem(
       id: 'egg_whole',
       name: 'Whole Boiled Egg',
@@ -82,8 +84,6 @@ class AppDataSheets {
       per100gFat: 0.9,
       pieceWeight: 250.0,
     ),
-
-    // CARBS & GRAINS
     const FoodItem(
       id: 'rolled_oats',
       name: 'Rolled Oats (Raw)',
@@ -144,8 +144,6 @@ class AppDataSheets {
       per100gFat: 0.1,
       pieceWeight: 150.0,
     ),
-
-    // PULSES & LEGUMES
     const FoodItem(
       id: 'toor_daal_cooked',
       name: 'Toor Daal (Cooked Tadka)',
@@ -176,8 +174,6 @@ class AppDataSheets {
       per100gFat: 2.6,
       tbspWeight: 20.0,
     ),
-
-    // NUTS, SEEDS & FATS
     const FoodItem(
       id: 'peanut_butter',
       name: 'Peanut Butter (Natural 100%)',
@@ -231,8 +227,6 @@ class AppDataSheets {
       tbspWeight: 14.0,
       tspWeight: 4.5,
     ),
-
-    // FRUITS & SALAD
     const FoodItem(
       id: 'dates_khajoor',
       name: 'Kimia / Medjool Dates (Khajoor)',
@@ -286,63 +280,107 @@ class AppDataSheets {
     ),
   ];
 
-  static final List<WorkoutExercise> exerciseMasterList = [
-    // --- CHEST ---
+  // Built-in Static Exercises
+  static final List<WorkoutExercise> initialExerciseDatabase = [
+    // CHEST
     WorkoutExercise(id: 'c1', name: 'Barbell Flat Bench Press', category: 'Chest', sets: 4, reps: '8-10 reps', restSeconds: '90s'),
     WorkoutExercise(id: 'c2', name: 'Incline Dumbbell Press', category: 'Chest', sets: 3, reps: '10-12 reps', restSeconds: '75s'),
     WorkoutExercise(id: 'c3', name: 'Cable Low-to-High Flyes', category: 'Chest', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'c4', name: 'Dips (Chest Focus)', category: 'Chest', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'c5', name: 'Machine Chest Press', category: 'Chest', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
 
-    // --- BACK ---
+    // BACK
     WorkoutExercise(id: 'b1', name: 'Lat Pulldown (Wide Grip)', category: 'Back', sets: 4, reps: '10-12 reps', restSeconds: '75s'),
     WorkoutExercise(id: 'b2', name: 'Seated Cable Row (Neutral)', category: 'Back', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'b3', name: 'Barbell Bent Over Row', category: 'Back', sets: 4, reps: '8-10 reps', restSeconds: '90s'),
     WorkoutExercise(id: 'b4', name: 'One-Arm Dumbbell Row', category: 'Back', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'b5', name: 'Straight Arm Cable Pulldown', category: 'Back', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
 
-    // --- LEGS ---
+    // LEGS
     WorkoutExercise(id: 'l1', name: 'Barbell Back Squat', category: 'Legs', sets: 4, reps: '8-10 reps', restSeconds: '120s'),
     WorkoutExercise(id: 'l2', name: 'Leg Press (Quad Focus)', category: 'Legs', sets: 4, reps: '10-12 reps', restSeconds: '90s'),
     WorkoutExercise(id: 'l3', name: 'Romanian Deadlift (Hamstrings)', category: 'Legs', sets: 3, reps: '8-10 reps', restSeconds: '90s'),
     WorkoutExercise(id: 'l4', name: 'Lying / Seated Leg Curl', category: 'Legs', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'l5', name: 'Standing Calf Raise', category: 'Legs', sets: 4, reps: '15-20 reps', restSeconds: '45s'),
 
-    // --- SHOULDERS ---
+    // SHOULDERS
     WorkoutExercise(id: 's1', name: 'Overhead DB Shoulder Press', category: 'Shoulders', sets: 4, reps: '8-10 reps', restSeconds: '90s'),
     WorkoutExercise(id: 's2', name: 'Dumbbell Lateral Raise', category: 'Shoulders', sets: 4, reps: '12-15 reps', restSeconds: '60s'),
     WorkoutExercise(id: 's3', name: 'Cable Face Pull (Rear Delts)', category: 'Shoulders', sets: 4, reps: '15 reps', restSeconds: '60s'),
     WorkoutExercise(id: 's4', name: 'Reverse Pec Deck Fly', category: 'Shoulders', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
 
-    // --- ARMS ---
+    // ARMS
     WorkoutExercise(id: 'a1', name: 'Barbell EZ-Bar Bicep Curl', category: 'Arms', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'a2', name: 'Incline DB Hammer Curl', category: 'Arms', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'a3', name: 'Triceps Rope Pushdown', category: 'Arms', sets: 4, reps: '12-15 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'a4', name: 'Overhead DB Triceps Ext.', category: 'Arms', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
 
-    // --- CARDIO MACHINES ---
+    // CARDIO MACHINES
     WorkoutExercise(id: 'cd1', name: 'Incline Treadmill Walk (12% Incline)', category: 'Cardio', sets: 1, reps: '20-25 min', restSeconds: '0s'),
     WorkoutExercise(id: 'cd2', name: 'Elliptical Cross Trainer (Mod Pace)', category: 'Cardio', sets: 1, reps: '20 min', restSeconds: '0s'),
     WorkoutExercise(id: 'cd3', name: 'Stationary Spin Bike / Air Bike', category: 'Cardio', sets: 1, reps: '15-20 min', restSeconds: '0s'),
     WorkoutExercise(id: 'cd4', name: 'Concept2 Rowing Machine', category: 'Cardio', sets: 5, reps: '500m intervals', restSeconds: '60s'),
     WorkoutExercise(id: 'cd5', name: 'StairMaster Step Climber', category: 'Cardio', sets: 1, reps: '15 min', restSeconds: '0s'),
 
-    // --- FLOOR & BODYWEIGHT ---
+    // FLOOR & BODYWEIGHT
     WorkoutExercise(id: 'fl1', name: 'Standard Push-Ups (Floor)', category: 'Floor', sets: 3, reps: '15-20 reps', restSeconds: '60s'),
     WorkoutExercise(id: 'fl2', name: 'Walking Bodyweight Lunges', category: 'Floor', sets: 3, reps: '20 steps total', restSeconds: '60s'),
     WorkoutExercise(id: 'fl3', name: 'Bodyweight Jump Squats', category: 'Floor', sets: 3, reps: '15 reps', restSeconds: '45s'),
     WorkoutExercise(id: 'fl4', name: 'Mountain Climbers (Floor)', category: 'Floor', sets: 3, reps: '30-40 sec pace', restSeconds: '45s'),
 
-    // --- HIIT CIRCUITS ---
+    // HIIT CIRCUITS
     WorkoutExercise(id: 'ht1', name: 'Burpees (Full Chest-to-Floor)', category: 'HIIT', sets: 4, reps: '12 reps', restSeconds: '45s'),
     WorkoutExercise(id: 'ht2', name: 'Battle Ropes (Alternating Waves)', category: 'HIIT', sets: 5, reps: '30s on / 30s off', restSeconds: '30s'),
     WorkoutExercise(id: 'ht3', name: 'Kettlebell Swings (Hip Hinge)', category: 'HIIT', sets: 4, reps: '15-20 reps', restSeconds: '45s'),
     WorkoutExercise(id: 'ht4', name: 'Jumping Jacks & High Knees', category: 'HIIT', sets: 4, reps: '45s circuit', restSeconds: '30s'),
 
-    // --- CORE & ABS ---
+    // CORE & ABS
     WorkoutExercise(id: 'cr1', name: 'Hanging Leg / Knee Raises', category: 'Core', sets: 3, reps: '12-15 reps', restSeconds: '45s'),
     WorkoutExercise(id: 'cr2', name: 'Cable Rope Crunch (Kneeling)', category: 'Core', sets: 3, reps: '15-20 reps', restSeconds: '45s'),
     WorkoutExercise(id: 'cr3', name: 'Standard Elbow Plank Hold', category: 'Core', sets: 3, reps: '60s hold', restSeconds: '45s'),
     WorkoutExercise(id: 'cr4', name: 'Russian Twists (Floor)', category: 'Core', sets: 3, reps: '20 total reps', restSeconds: '45s'),
   ];
+
+  // Dynamic lists in memory
+  static List<FoodItem> foodDatabase = [...initialFoodDatabase];
+  static List<WorkoutExercise> exerciseMasterList = [...initialExerciseDatabase];
+
+  // Load saved custom items from phone storage
+  static Future<void> loadCustomData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final customFoodsJson = prefs.getStringList('custom_foods_list') ?? [];
+    foodDatabase = [...initialFoodDatabase];
+    for (var raw in customFoodsJson) {
+      try {
+        foodDatabase.add(FoodItem.fromJson(jsonDecode(raw)));
+      } catch (_) {}
+    }
+
+    final customExJson = prefs.getStringList('custom_exercises_list') ?? [];
+    exerciseMasterList = [...initialExerciseDatabase];
+    for (var raw in customExJson) {
+      try {
+        exerciseMasterList.add(WorkoutExercise.fromJson(jsonDecode(raw)));
+      } catch (_) {}
+    }
+  }
+
+  // Save new custom food into phone storage
+  static Future<void> addCustomFood(FoodItem food) async {
+    foodDatabase.add(food);
+    final prefs = await SharedPreferences.getInstance();
+    List<String> list = prefs.getStringList('custom_foods_list') ?? [];
+    list.add(jsonEncode(food.toJson()));
+    await prefs.setStringList('custom_foods_list', list);
+  }
+
+  // Save new custom workout exercise into phone storage
+  static Future<void> addCustomExercise(WorkoutExercise exercise) async {
+    exerciseMasterList.add(exercise);
+    final prefs = await SharedPreferences.getInstance();
+    List<String> list = prefs.getStringList('custom_exercises_list') ?? [];
+    list.add(jsonEncode(exercise.toJson()));
+    await prefs.setStringList('custom_exercises_list', list);
+  }
 }
