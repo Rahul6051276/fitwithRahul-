@@ -25,10 +25,10 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      # Yeh step missing Android native engine ko automatically generate kar dega
-      - name: Auto-generate missing Android platform files
+      # Explicit project name ke saath create hoga taaki folder name error na de
+      - name: Auto-generate Android platform files
         run: |
-          flutter create --platforms=android --org=com.fitwithrahul .
+          flutter create --platforms=android --org=com.fitwithrahul --project-name=fitwith_rahul .
 
       - name: Install Dependencies
         run: flutter pub get
