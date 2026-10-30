@@ -22,7 +22,6 @@ class PdfService {
   }) async {
     final pdf = pw.Document();
 
-    // 1. Coach Photo Asset Load
     final imageBytes = await rootBundle.load('assets/images/coach_rahul.png');
     final coachImage = pw.MemoryImage(imageBytes.buffer.asUint8List());
 
@@ -71,7 +70,6 @@ class PdfService {
         margin: const pw.EdgeInsets.all(18),
         build: (pw.Context context) {
           return [
-            // Header Banner with Coach Authentic Circular Photo
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
               decoration: pw.BoxDecoration(
@@ -116,8 +114,6 @@ class PdfService {
               ),
             ),
             pw.SizedBox(height: 8),
-
-            // Client Info Card
             pw.Container(
               padding: const pw.EdgeInsets.all(7),
               decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey300), borderRadius: pw.BorderRadius.circular(4)),
@@ -133,17 +129,12 @@ class PdfService {
               ),
             ),
             pw.SizedBox(height: 8),
-
-            // Meals Tables
             buildMealTable("MEAL 1: BREAKFAST", plan.meal1),
             buildMealTable("MEAL 2: MID-MORNING", plan.meal2),
             buildMealTable("MEAL 3: LUNCH", plan.meal3),
             buildMealTable("MEAL 4: EVENING SNACK", plan.meal4),
             buildMealTable("MEAL 5: DINNER", plan.meal5),
-
             pw.SizedBox(height: 5),
-
-            // Workout Table
             pw.Text("CUSTOM WORKOUT PROTOCOL", style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold, color: primaryDark)),
             pw.SizedBox(height: 3),
             pw.TableHelper.fromTextArray(
@@ -155,8 +146,6 @@ class PdfService {
               cellPadding: const pw.EdgeInsets.symmetric(vertical: 2.5, horizontal: 5),
             ),
             pw.SizedBox(height: 7),
-
-            // Water & Notes Section
             pw.Container(
               padding: const pw.EdgeInsets.all(7),
               decoration: pw.BoxDecoration(color: PdfColor.fromInt(0xFFF1F5F9), borderRadius: pw.BorderRadius.circular(4)),
@@ -173,7 +162,6 @@ class PdfService {
                 ],
               ),
             ),
-
             pw.SizedBox(height: 8),
             pw.Center(
               child: pw.UrlLink(
@@ -187,7 +175,7 @@ class PdfService {
     );
 
     final dir = await getTemporaryDirectory();
-    final file = File("${dir.path}/${clientName}_fitwithRahul_Plan.pdf");
+    final file = File("${dir.path}/${clientName.replaceAll(' ', '_')}_fitwithRahul_Plan.pdf");
     await file.writeAsBytes(await pdf.save());
 
     await Share.shareXFiles(
