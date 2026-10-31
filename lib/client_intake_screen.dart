@@ -11,13 +11,13 @@ class ClientIntakeScreen extends StatefulWidget {
 
 class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
   final _nameCtrl = TextEditingController(text: "Rahul Dhruw");
-  final _ageCtrl = TextEditingController(text: "26");
-  final _weightCtrl = TextEditingController(text: "75");
-  final _heightCtrl = TextEditingController(text: "172");
+  final _ageCtrl = TextEditingController(text: "39");
+  final _weightCtrl = TextEditingController(text: "80");
+  final _heightCtrl = TextEditingController(text: "173");
 
   String _gender = 'Male';
-  double _activity = 1.4;
-  MedicalCondition _condition = MedicalCondition.none;
+  double _activity = 1.4; // Default activity multiplier
+  MedicalCondition _condition = MedicalCondition.diabetes;
   String _goal = 'Fat Loss';
 
   ClientProfile get _currentAssessment {
@@ -113,6 +113,44 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
             ],
           ),
           const SizedBox(height: 16),
+
+          // --- 1. DAILY ACTIVITY LEVEL (TDEE MULTIPLIER) ---
+          const Text("Daily Activity Level (TDEE Factor):",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              ChoiceChip(
+                label: const Text("Sedentary (1.2)", style: TextStyle(fontSize: 11)),
+                selected: _activity == 1.2,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _activity = 1.2),
+              ),
+              ChoiceChip(
+                label: const Text("Light Active (1.375)", style: TextStyle(fontSize: 11)),
+                selected: _activity == 1.375,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _activity = 1.375),
+              ),
+              ChoiceChip(
+                label: const Text("Moderate Active (1.55)", style: TextStyle(fontSize: 11)),
+                selected: _activity == 1.55,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _activity = 1.55),
+              ),
+              ChoiceChip(
+                label: const Text("Very Active (1.725)", style: TextStyle(fontSize: 11)),
+                selected: _activity == 1.725,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _activity = 1.725),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // --- 2. MEDICAL / ENDOCRINE PROFILE ---
           const Text("Medical / Endocrine Profile:",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
           const SizedBox(height: 6),
@@ -147,6 +185,8 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
             ],
           ),
           const SizedBox(height: 16),
+
+          // --- 3. TARGET FITNESS GOAL ---
           const Text("Target Fitness Goal:",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
           const SizedBox(height: 6),
@@ -165,7 +205,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
           ),
           const SizedBox(height: 20),
 
-          // METABOLIC SCIENCE REPORT CARD
+          // --- METABOLIC SCIENCE REPORT CARD ---
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -191,7 +231,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Maintenance: ${tdee.toStringAsFixed(0)} kcal",
+                    Text("Maintenance (TDEE x${_activity}): ${tdee.toStringAsFixed(0)} kcal",
                         style: const TextStyle(color: Colors.white70, fontSize: 12)),
                     Text("Target: ${targetCal.toStringAsFixed(0)} kcal",
                         style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
@@ -201,6 +241,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
             ),
           ),
           const SizedBox(height: 24),
+
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF59E0B),
