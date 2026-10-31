@@ -16,7 +16,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
   final _heightCtrl = TextEditingController(text: "172");
 
   String _gender = 'Male';
-  double _activity = 1.4; // Standard resistance training multiplier
+  double _activity = 1.4;
   MedicalCondition _condition = MedicalCondition.none;
   String _goal = 'Fat Loss';
 
@@ -25,8 +25,8 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
       name: _nameCtrl.text.trim(),
       age: int.tryParse(_ageCtrl.text) ?? 25,
       gender: _gender,
-      weightKg: double.tryParse(_weightCtrl.text) ?? 70,
-      heightCm: double.tryParse(_heightCtrl.text) ?? 170,
+      weightKg: double.tryParse(_weightCtrl.text) ?? 70.0,
+      heightCm: double.tryParse(_heightCtrl.text) ?? 170.0,
       activityMultiplier: _activity,
       condition: _condition,
       goal: _goal,
@@ -113,9 +113,8 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Medical Profile Selector
-          const Text("Medical / Endocrine Profile:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
+          const Text("Medical / Endocrine Profile:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
           const SizedBox(height: 6),
           Wrap(
             spacing: 6,
@@ -148,9 +147,8 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Goal Selector
-          const Text("Target Fitness Goal:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
+          const Text("Target Fitness Goal:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
           const SizedBox(height: 6),
           Row(
             children: ['Fat Loss', 'Muscle Gain', 'Body Recomp'].map((g) {
@@ -167,7 +165,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Science Calculation Output Card
+          // CLEAN FORMATTED METABOLIC CARD
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -177,29 +175,32 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("METABOLIC SCIENCE REPORT", style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
+                const Text("METABOLIC SCIENCE REPORT",
+                    style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
                 const Divider(color: Colors.white24, height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Base BMR: ${client.baseBmr.toStringAsFixed(0)} kcal", style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                    Text("Adjusted BMR: ${bmr.toStringAsFixed(0)} kcal", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                    Text("Base BMR: ${client.baseBmr.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text("Adjusted BMR: ${bmr.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Maintenance (TDEE): ${tdee.toStringAsFixed(0)} kcal", style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                    Text("Calibrated Target: ${targetCal.toStringAsFixed(0)} kcal", style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text("Maintenance: ${tdee.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text("Target: ${targetCal.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
                   ],
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-
-          // Proceed Button
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF59E0B),
@@ -212,18 +213,11 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
               style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13),
             ),
             onPressed: () {
-              String conditionNote = _condition != MedicalCondition.none
-                  ? "Medical Profile: ${_condition.name.toUpperCase()} (Low-GI prioritized). "
-                  : "";
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (ctx) => PlannerScreen(
-                    initialClientName: client.name,
-                    initialTargetCalories: targetCal,
-                    initialGoal: client.goal,
-                    initialNotes: "${conditionNote}Creatine 3-5g daily. Progressive Overload prioritize karein.",
+                    initialClient: client,
                   ),
                 ),
               );
