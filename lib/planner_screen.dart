@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences';
 import 'models.dart';
 import 'database.dart';
 import 'pdf_service.dart';
@@ -1068,6 +1068,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             MealEntry item = entry.value;
 
             return Card(
+              key: ValueKey('meal_card_${_selectedMealIndex}_${item.food.id}_$idx'),
               margin: const EdgeInsets.symmetric(vertical: 4),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -1089,6 +1090,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                     SizedBox(
                       width: 55,
                       child: TextFormField(
+                        key: ValueKey('input_qty_${_selectedMealIndex}_${item.food.id}_$idx'),
                         initialValue: item.quantity.toStringAsFixed(0),
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
@@ -1118,6 +1120,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                         if (newUnit != null) {
                           setState(() {
                             final updatedFood = FoodItem(
+                              id: item.food.id,
                               name: item.food.name,
                               calories: item.food.calories,
                               protein: item.food.protein,
