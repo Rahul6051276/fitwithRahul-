@@ -3,384 +3,99 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 
-class AppDataSheets {
-  // Built-in Static Foods
-  static final List<FoodItem> initialFoodDatabase = [
-    const FoodItem(
-      id: 'egg_whole',
-      name: 'Whole Boiled Egg',
-      icon: Icons.egg_outlined,
-      per100gCalories: 155,
-      per100gProtein: 13.0,
-      per100gCarbs: 1.1,
-      per100gFat: 11.0,
-      pieceWeight: 50.0,
-    ),
-    const FoodItem(
-      id: 'egg_white',
-      name: 'Egg White (Boiled)',
-      icon: Icons.egg,
-      per100gCalories: 52,
-      per100gProtein: 11.0,
-      per100gCarbs: 0.7,
-      per100gFat: 0.2,
-      pieceWeight: 33.0,
-    ),
-    const FoodItem(
-      id: 'soya_chunks',
-      name: 'Soya Chunks (Raw)',
-      icon: Icons.grain,
-      per100gCalories: 345,
-      per100gProtein: 52.0,
-      per100gCarbs: 33.0,
-      per100gFat: 0.5,
-      tbspWeight: 12.0,
-    ),
-    const FoodItem(
-      id: 'whey_isolate',
-      name: 'Whey Protein Powder',
-      icon: Icons.fitness_center,
-      per100gCalories: 390,
-      per100gProtein: 80.0,
-      per100gCarbs: 6.0,
-      per100gFat: 4.0,
-      pieceWeight: 33.0,
-    ),
-    const FoodItem(
-      id: 'chicken_breast',
-      name: 'Chicken Breast (Raw)',
-      icon: Icons.set_meal,
-      per100gCalories: 165,
-      per100gProtein: 31.0,
-      per100gCarbs: 0.0,
-      per100gFat: 3.6,
-    ),
-    const FoodItem(
-      id: 'paneer_raw',
-      name: 'Paneer (Raw Dairy)',
-      icon: Icons.crop_square,
-      per100gCalories: 295,
-      per100gProtein: 18.5,
-      per100gCarbs: 4.5,
-      per100gFat: 23.0,
-      pieceWeight: 25.0,
-    ),
-    const FoodItem(
-      id: 'tofu_firm',
-      name: 'Tofu (Soya Paneer)',
-      icon: Icons.layers,
-      per100gCalories: 76,
-      per100gProtein: 8.0,
-      per100gCarbs: 1.9,
-      per100gFat: 4.8,
-    ),
-    const FoodItem(
-      id: 'buttermilk_plain',
-      name: 'Chaas / Buttermilk (Plain)',
-      icon: Icons.local_drink,
-      per100gCalories: 40,
-      per100gProtein: 3.0,
-      per100gCarbs: 4.8,
-      per100gFat: 0.9,
-      pieceWeight: 250.0,
-    ),
-    const FoodItem(
-      id: 'rolled_oats',
-      name: 'Rolled Oats (Raw)',
-      icon: Icons.breakfast_dining,
-      per100gCalories: 389,
-      per100gProtein: 16.9,
-      per100gCarbs: 66.3,
-      per100gFat: 6.9,
-      tbspWeight: 10.0,
-    ),
-    const FoodItem(
-      id: 'white_rice_cooked',
-      name: 'White Rice (Cooked)',
-      icon: Icons.rice_bowl,
-      per100gCalories: 130,
-      per100gProtein: 2.7,
-      per100gCarbs: 28.2,
-      per100gFat: 0.3,
-      tbspWeight: 25.0,
-    ),
-    const FoodItem(
-      id: 'brown_rice_cooked',
-      name: 'Brown Rice (Cooked)',
-      icon: Icons.rice_bowl,
-      per100gCalories: 111,
-      per100gProtein: 2.6,
-      per100gCarbs: 23.0,
-      per100gFat: 0.9,
-      tbspWeight: 25.0,
-    ),
-    const FoodItem(
-      id: 'wheat_roti',
-      name: 'Whole Wheat Roti / Chapati',
-      icon: Icons.circle_outlined,
-      per100gCalories: 264,
-      per100gProtein: 9.0,
-      per100gCarbs: 52.0,
-      per100gFat: 2.0,
-      pieceWeight: 35.0,
-    ),
-    const FoodItem(
-      id: 'sweet_potato_boiled',
-      name: 'Sweet Potato (Boiled)',
-      icon: Icons.eco,
-      per100gCalories: 86,
-      per100gProtein: 1.6,
-      per100gCarbs: 20.1,
-      per100gFat: 0.1,
-      pieceWeight: 130.0,
-    ),
-    const FoodItem(
-      id: 'potato_boiled',
-      name: 'White Potato (Boiled)',
-      icon: Icons.circle,
-      per100gCalories: 87,
-      per100gProtein: 1.9,
-      per100gCarbs: 20.0,
-      per100gFat: 0.1,
-      pieceWeight: 150.0,
-    ),
-    const FoodItem(
-      id: 'toor_daal_cooked',
-      name: 'Toor Daal (Cooked Tadka)',
-      icon: Icons.soup_kitchen,
-      per100gCalories: 105,
-      per100gProtein: 6.2,
-      per100gCarbs: 15.0,
-      per100gFat: 2.1,
-      tbspWeight: 20.0,
-    ),
-    const FoodItem(
-      id: 'moong_sprouts_raw',
-      name: 'Moong Sprouts (Raw)',
-      icon: Icons.spa,
-      per100gCalories: 105,
-      per100gProtein: 7.0,
-      per100gCarbs: 19.0,
-      per100gFat: 0.4,
-      tbspWeight: 15.0,
-    ),
-    const FoodItem(
-      id: 'boiled_chana',
-      name: 'Black Chana / Chickpeas (Boiled)',
-      icon: Icons.circle_notifications,
-      per100gCalories: 164,
-      per100gProtein: 8.9,
-      per100gCarbs: 27.4,
-      per100gFat: 2.6,
-      tbspWeight: 20.0,
-    ),
-    const FoodItem(
-      id: 'peanut_butter',
-      name: 'Peanut Butter (Natural 100%)',
-      icon: Icons.breakfast_dining,
-      per100gCalories: 588,
-      per100gProtein: 25.0,
-      per100gCarbs: 20.0,
-      per100gFat: 50.0,
-      tbspWeight: 16.0,
-      tspWeight: 5.0,
-    ),
-    const FoodItem(
-      id: 'almonds_raw',
-      name: 'Almonds (Badam)',
-      icon: Icons.energy_savings_leaf,
-      per100gCalories: 579,
-      per100gProtein: 21.0,
-      per100gCarbs: 21.6,
-      per100gFat: 49.9,
-      pieceWeight: 1.2,
-    ),
-    const FoodItem(
-      id: 'cashews_raw',
-      name: 'Cashews (Kaju)',
-      icon: Icons.nature,
-      per100gCalories: 553,
-      per100gProtein: 18.2,
-      per100gCarbs: 30.2,
-      per100gFat: 43.8,
-      pieceWeight: 1.5,
-    ),
-    const FoodItem(
-      id: 'olive_oil',
-      name: 'Olive Oil / Mustard Oil',
-      icon: Icons.opacity,
-      per100gCalories: 884,
-      per100gProtein: 0.0,
-      per100gCarbs: 0.0,
-      per100gFat: 100.0,
-      tbspWeight: 14.0,
-      tspWeight: 4.5,
-    ),
-    const FoodItem(
-      id: 'ghee_pure',
-      name: 'Pure Desi Ghee',
-      icon: Icons.format_color_fill,
-      per100gCalories: 900,
-      per100gProtein: 0.0,
-      per100gCarbs: 0.0,
-      per100gFat: 100.0,
-      tbspWeight: 14.0,
-      tspWeight: 4.5,
-    ),
-    const FoodItem(
-      id: 'dates_khajoor',
-      name: 'Kimia / Medjool Dates (Khajoor)',
-      icon: Icons.brightness_1,
-      per100gCalories: 282,
-      per100gProtein: 2.5,
-      per100gCarbs: 75.0,
-      per100gFat: 0.4,
-      pieceWeight: 10.0,
-    ),
-    const FoodItem(
-      id: 'raisins_kishmish',
-      name: 'Raisins (Kishmish)',
-      icon: Icons.grain,
-      per100gCalories: 299,
-      per100gProtein: 3.1,
-      per100gCarbs: 79.2,
-      per100gFat: 0.5,
-      tbspWeight: 12.0,
-      tspWeight: 4.0,
-    ),
-    const FoodItem(
-      id: 'banana_fresh',
-      name: 'Fresh Banana (Kela)',
-      icon: Icons.food_bank,
-      per100gCalories: 89,
-      per100gProtein: 1.1,
-      per100gCarbs: 22.8,
-      per100gFat: 0.3,
-      pieceWeight: 110.0,
-    ),
-    const FoodItem(
-      id: 'apple_fresh',
-      name: 'Fresh Apple (Seb)',
-      icon: Icons.apple,
-      per100gCalories: 52,
-      per100gProtein: 0.3,
-      per100gCarbs: 13.8,
-      per100gFat: 0.2,
-      pieceWeight: 150.0,
-    ),
-    const FoodItem(
-      id: 'cucumber_salad',
-      name: 'Cucumber Salad (Kheera)',
-      icon: Icons.grass,
-      per100gCalories: 15,
-      per100gProtein: 0.7,
-      per100gCarbs: 3.6,
-      per100gFat: 0.1,
-      pieceWeight: 120.0,
-    ),
+class AppDatabase {
+  // --- DEFAULT FOOD DATABASE ---
+  static const List<FoodItem> initialFoodDatabase = [
+    // PROTEINS & DAIRY
+    FoodItem(id: 'wh_egg', name: 'Whole Boiled Egg', calories: 78, protein: 6.3, carbs: 0.6, fats: 5.3, unit: 'pcs', pieceWeight: 50.0, icon: Icons.egg),
+    FoodItem(id: 'egg_white', name: 'Egg White (Boiled)', calories: 17, protein: 3.6, carbs: 0.2, fats: 0.1, unit: 'pcs', pieceWeight: 33.0, icon: Icons.egg_outlined),
+    FoodItem(id: 'soya_chunks', name: 'Soya Chunks (Raw)', calories: 345, protein: 52.0, carbs: 33.0, fats: 0.5, unit: 'g', icon: Icons.grain),
+    FoodItem(id: 'low_fat_paneer', name: 'Low Fat Paneer', calories: 200, protein: 20.0, carbs: 4.0, fats: 12.0, unit: 'g', icon: Icons.lunch_dining),
+    FoodItem(id: 'regular_paneer', name: 'Regular Paneer', calories: 296, protein: 18.0, carbs: 4.5, fats: 23.0, unit: 'g', icon: Icons.lunch_dining),
+    FoodItem(id: 'whey_protein', name: 'Whey Protein', calories: 120, protein: 24.0, carbs: 2.5, fats: 1.5, unit: 'scoop', scoopWeight: 30.0, icon: Icons.fitness_center),
+    FoodItem(id: 'chicken_breast', name: 'Chicken Breast (Raw)', calories: 120, protein: 22.5, carbs: 0.0, fats: 2.6, unit: 'g', icon: Icons.restaurant),
+    FoodItem(id: 'tofu_raw', name: 'Tofu (Soy Paneer)', calories: 76, protein: 8.0, carbs: 1.9, fats: 4.8, unit: 'g', icon: Icons.kitchen),
+
+    // GRAINS & CARBS
+    FoodItem(id: 'rolled_oats', name: 'Rolled Oats (Raw)', calories: 389, protein: 16.9, carbs: 66.3, fats: 6.9, unit: 'g', icon: Icons.breakfast_dining),
+    FoodItem(id: 'white_rice', name: 'White Rice (Cooked)', calories: 130, protein: 2.7, carbs: 28.2, fats: 0.3, unit: 'g', icon: Icons.rice_bowl),
+    FoodItem(id: 'brown_rice', name: 'Brown Rice (Cooked)', calories: 111, protein: 2.6, carbs: 23.0, fats: 0.9, unit: 'g', icon: Icons.rice_bowl),
+    FoodItem(id: 'wheat_roti', name: 'Wheat Roti (Plain)', calories: 120, protein: 3.5, carbs: 22.0, fats: 2.0, unit: 'pcs', pieceWeight: 35.0, icon: Icons.circle),
+    FoodItem(id: 'dalia_cooked', name: 'Wheat Dalia (Cooked)', calories: 85, protein: 3.0, carbs: 18.0, fats: 0.3, unit: 'g', icon: Icons.soup_kitchen),
+    FoodItem(id: 'boiled_potato', name: 'Boiled Potato', calories: 87, protein: 1.9, carbs: 20.0, fats: 0.1, unit: 'g', icon: Icons.circle_outlined),
+    FoodItem(id: 'sweet_potato', name: 'Sweet Potato (Shakarkand)', calories: 86, protein: 1.6, carbs: 20.1, fats: 0.1, unit: 'g', icon: Icons.circle_outlined),
+
+    // LEGUMES & SPROUTS
+    FoodItem(id: 'moong_sprouts', name: 'Moong Sprouts (Raw)', calories: 105, protein: 7.0, carbs: 19.0, fats: 0.4, unit: 'g', icon: Icons.spa),
+    FoodItem(id: 'boiled_chana', name: 'Boiled Black Chana', calories: 164, protein: 8.9, carbs: 27.4, fats: 2.6, unit: 'g', icon: Icons.circle),
+
+    // NUTS & HEALTHY FATS
+    FoodItem(id: 'peanut_butter', name: 'Peanut Butter (Unsweetened)', calories: 95, protein: 4.0, carbs: 3.0, fats: 8.0, unit: 'tbsp', tbspWeight: 16.0, icon: Icons.breakfast_dining),
+    FoodItem(id: 'almonds_raw', name: 'Raw Almonds (Badam)', calories: 579, protein: 21.0, carbs: 21.6, fats: 49.9, unit: 'pcs', pieceWeight: 1.2, icon: Icons.energy_savings_leaf),
+    FoodItem(id: 'cashews_raw', name: 'Raw Cashews (Kaju)', calories: 553, protein: 18.2, carbs: 30.2, fats: 43.8, unit: 'pcs', pieceWeight: 1.5, icon: Icons.nature),
+    FoodItem(id: 'olive_oil', name: 'Extra Virgin Olive Oil', calories: 884, protein: 0.0, carbs: 0.0, fats: 100.0, unit: 'tbsp', tbspWeight: 14.0, tspWeight: 4.5, icon: Icons.opacity),
+    FoodItem(id: 'pure_ghee', name: 'Pure Desi Ghee', calories: 900, protein: 0.0, carbs: 0.0, fats: 100.0, unit: 'tbsp', tbspWeight: 14.0, tspWeight: 4.5, icon: Icons.format_color_fill),
+
+    // FRUITS & SWEETS
+    FoodItem(id: 'dates_khajoor', name: 'Dates (Khajoor)', calories: 20, protein: 0.2, carbs: 5.3, fats: 0.1, unit: 'pcs', pieceWeight: 10.0, icon: Icons.brightness_1),
+    FoodItem(id: 'raisins_kishmish', name: 'Raisins (Kishmish)', calories: 299, protein: 3.1, carbs: 79.2, fats: 0.5, unit: 'tbsp', tbspWeight: 12.0, icon: Icons.grain),
+    FoodItem(id: 'fresh_banana', name: 'Banana (Medium)', calories: 89, protein: 1.1, carbs: 23.0, fats: 0.3, unit: 'pcs', pieceWeight: 110.0, icon: Icons.food_bank),
+    FoodItem(id: 'fresh_apple', name: 'Fresh Apple', calories: 52, protein: 0.3, carbs: 13.8, fats: 0.2, unit: 'pcs', pieceWeight: 150.0, icon: Icons.apple),
+    FoodItem(id: 'cucumber_salad', name: 'Cucumber (Kheera)', calories: 15, protein: 0.7, carbs: 3.6, fats: 0.1, unit: 'pcs', pieceWeight: 120.0, icon: Icons.grass),
+    FoodItem(id: 'roasted_makhana', name: 'Roasted Makhana', calories: 350, protein: 9.7, carbs: 76.0, fats: 0.1, unit: 'g', icon: Icons.grain),
   ];
 
-  // Built-in Static Exercises
-  static final List<WorkoutExercise> initialExerciseDatabase = [
+  // --- DEFAULT EXERCISE MASTER DATABASE ---
+  static const List<WorkoutExercise> initialExerciseDatabase = [
     // CHEST
-    WorkoutExercise(id: 'c1', name: 'Barbell Flat Bench Press', category: 'Chest', sets: 4, reps: '8-10 reps', restSeconds: '90s'),
-    WorkoutExercise(id: 'c2', name: 'Incline Dumbbell Press', category: 'Chest', sets: 3, reps: '10-12 reps', restSeconds: '75s'),
-    WorkoutExercise(id: 'c3', name: 'Cable Low-to-High Flyes', category: 'Chest', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'c4', name: 'Dips (Chest Focus)', category: 'Chest', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'c5', name: 'Machine Chest Press', category: 'Chest', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
+    WorkoutExercise(id: 'ch1', name: 'Barbell Flat Bench Press', category: 'Chest', sets: 4, reps: '8-10', restSeconds: '90s'),
+    WorkoutExercise(id: 'ch2', name: 'Incline Dumbbell Press', category: 'Chest', sets: 3, reps: '10-12', restSeconds: '75s'),
+    WorkoutExercise(id: 'ch3', name: 'Cable Low-to-High Flyes', category: 'Chest', sets: 3, reps: '12-15', restSeconds: '60s'),
+    WorkoutExercise(id: 'ch4', name: 'Standard Push-Ups', category: 'Chest', sets: 3, reps: '15-20', restSeconds: '60s'),
 
     // BACK
-    WorkoutExercise(id: 'b1', name: 'Lat Pulldown (Wide Grip)', category: 'Back', sets: 4, reps: '10-12 reps', restSeconds: '75s'),
-    WorkoutExercise(id: 'b2', name: 'Seated Cable Row (Neutral)', category: 'Back', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'b3', name: 'Barbell Bent Over Row', category: 'Back', sets: 4, reps: '8-10 reps', restSeconds: '90s'),
-    WorkoutExercise(id: 'b4', name: 'One-Arm Dumbbell Row', category: 'Back', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'b5', name: 'Straight Arm Cable Pulldown', category: 'Back', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
+    WorkoutExercise(id: 'bk1', name: 'Lat Pulldown (Wide Grip)', category: 'Back', sets: 4, reps: '10-12', restSeconds: '75s'),
+    WorkoutExercise(id: 'bk2', name: 'Barbell Bent-Over Row', category: 'Back', sets: 4, reps: '8-10', restSeconds: '90s'),
+    WorkoutExercise(id: 'bk3', name: 'Seated Cable Row', category: 'Back', sets: 3, reps: '10-12', restSeconds: '60s'),
+    WorkoutExercise(id: 'bk4', name: 'One-Arm Dumbbell Row', category: 'Back', sets: 3, reps: '10-12', restSeconds: '60s'),
 
     // LEGS
-    WorkoutExercise(id: 'l1', name: 'Barbell Back Squat', category: 'Legs', sets: 4, reps: '8-10 reps', restSeconds: '120s'),
-    WorkoutExercise(id: 'l2', name: 'Leg Press (Quad Focus)', category: 'Legs', sets: 4, reps: '10-12 reps', restSeconds: '90s'),
-    WorkoutExercise(id: 'l3', name: 'Romanian Deadlift (Hamstrings)', category: 'Legs', sets: 3, reps: '8-10 reps', restSeconds: '90s'),
-    WorkoutExercise(id: 'l4', name: 'Lying / Seated Leg Curl', category: 'Legs', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'l5', name: 'Standing Calf Raise', category: 'Legs', sets: 4, reps: '15-20 reps', restSeconds: '45s'),
+    WorkoutExercise(id: 'lg1', name: 'Barbell Back Squat', category: 'Legs', sets: 4, reps: '8-10', restSeconds: '120s'),
+    WorkoutExercise(id: 'lg2', name: 'Romanian Deadlift (RDL)', category: 'Legs', sets: 3, reps: '8-10', restSeconds: '90s'),
+    WorkoutExercise(id: 'lg3', name: 'Leg Press Machine', category: 'Legs', sets: 3, reps: '10-12', restSeconds: '75s'),
+    WorkoutExercise(id: 'lg4', name: 'Lying Hamstring Leg Curls', category: 'Legs', sets: 3, reps: '12-15', restSeconds: '60s'),
+    WorkoutExercise(id: 'lg5', name: 'Standing Calf Raise', category: 'Legs', sets: 4, reps: '15-20', restSeconds: '45s'),
 
     // SHOULDERS
-    WorkoutExercise(id: 's1', name: 'Overhead DB Shoulder Press', category: 'Shoulders', sets: 4, reps: '8-10 reps', restSeconds: '90s'),
-    WorkoutExercise(id: 's2', name: 'Dumbbell Lateral Raise', category: 'Shoulders', sets: 4, reps: '12-15 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 's3', name: 'Cable Face Pull (Rear Delts)', category: 'Shoulders', sets: 4, reps: '15 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 's4', name: 'Reverse Pec Deck Fly', category: 'Shoulders', sets: 3, reps: '12-15 reps', restSeconds: '60s'),
+    WorkoutExercise(id: 'sh1', name: 'Overhead Dumbbell Shoulder Press', category: 'Shoulders', sets: 4, reps: '8-10', restSeconds: '75s'),
+    WorkoutExercise(id: 'sh2', name: 'Dumbbell Lateral Raise', category: 'Shoulders', sets: 4, reps: '12-15', restSeconds: '45s'),
+    WorkoutExercise(id: 'sh3', name: 'Cable Face Pulls', category: 'Shoulders', sets: 4, reps: '15', restSeconds: '45s'),
 
     // ARMS
-    WorkoutExercise(id: 'a1', name: 'Barbell EZ-Bar Bicep Curl', category: 'Arms', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'a2', name: 'Incline DB Hammer Curl', category: 'Arms', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'a3', name: 'Triceps Rope Pushdown', category: 'Arms', sets: 4, reps: '12-15 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'a4', name: 'Overhead DB Triceps Ext.', category: 'Arms', sets: 3, reps: '10-12 reps', restSeconds: '60s'),
+    WorkoutExercise(id: 'ar1', name: 'EZ Bar Bicep Curl', category: 'Arms', sets: 3, reps: '10-12', restSeconds: '60s'),
+    WorkoutExercise(id: 'ar2', name: 'Incline Dumbbell Hammer Curl', category: 'Arms', sets: 3, reps: '10-12', restSeconds: '60s'),
+    WorkoutExercise(id: 'ar3', name: 'Triceps Rope Pushdown', category: 'Arms', sets: 3, reps: '12-15', restSeconds: '60s'),
 
-    // CARDIO MACHINES
-    WorkoutExercise(id: 'cd1', name: 'Incline Treadmill Walk (12% Incline)', category: 'Cardio', sets: 1, reps: '20-25 min', restSeconds: '0s'),
-    WorkoutExercise(id: 'cd2', name: 'Elliptical Cross Trainer (Mod Pace)', category: 'Cardio', sets: 1, reps: '20 min', restSeconds: '0s'),
-    WorkoutExercise(id: 'cd3', name: 'Stationary Spin Bike / Air Bike', category: 'Cardio', sets: 1, reps: '15-20 min', restSeconds: '0s'),
-    WorkoutExercise(id: 'cd4', name: 'Concept2 Rowing Machine', category: 'Cardio', sets: 5, reps: '500m intervals', restSeconds: '60s'),
-    WorkoutExercise(id: 'cd5', name: 'StairMaster Step Climber', category: 'Cardio', sets: 1, reps: '15 min', restSeconds: '0s'),
-
-    // FLOOR & BODYWEIGHT
-    WorkoutExercise(id: 'fl1', name: 'Standard Push-Ups (Floor)', category: 'Floor', sets: 3, reps: '15-20 reps', restSeconds: '60s'),
-    WorkoutExercise(id: 'fl2', name: 'Walking Bodyweight Lunges', category: 'Floor', sets: 3, reps: '20 steps total', restSeconds: '60s'),
-    WorkoutExercise(id: 'fl3', name: 'Bodyweight Jump Squats', category: 'Floor', sets: 3, reps: '15 reps', restSeconds: '45s'),
-    WorkoutExercise(id: 'fl4', name: 'Mountain Climbers (Floor)', category: 'Floor', sets: 3, reps: '30-40 sec pace', restSeconds: '45s'),
-
-    // HIIT CIRCUITS
-    WorkoutExercise(id: 'ht1', name: 'Burpees (Full Chest-to-Floor)', category: 'HIIT', sets: 4, reps: '12 reps', restSeconds: '45s'),
-    WorkoutExercise(id: 'ht2', name: 'Battle Ropes (Alternating Waves)', category: 'HIIT', sets: 5, reps: '30s on / 30s off', restSeconds: '30s'),
-    WorkoutExercise(id: 'ht3', name: 'Kettlebell Swings (Hip Hinge)', category: 'HIIT', sets: 4, reps: '15-20 reps', restSeconds: '45s'),
-    WorkoutExercise(id: 'ht4', name: 'Jumping Jacks & High Knees', category: 'HIIT', sets: 4, reps: '45s circuit', restSeconds: '30s'),
-
-    // CORE & ABS
-    WorkoutExercise(id: 'cr1', name: 'Hanging Leg / Knee Raises', category: 'Core', sets: 3, reps: '12-15 reps', restSeconds: '45s'),
-    WorkoutExercise(id: 'cr2', name: 'Cable Rope Crunch (Kneeling)', category: 'Core', sets: 3, reps: '15-20 reps', restSeconds: '45s'),
-    WorkoutExercise(id: 'cr3', name: 'Standard Elbow Plank Hold', category: 'Core', sets: 3, reps: '60s hold', restSeconds: '45s'),
-    WorkoutExercise(id: 'cr4', name: 'Russian Twists (Floor)', category: 'Core', sets: 3, reps: '20 total reps', restSeconds: '45s'),
+    // CORE & HIIT
+    WorkoutExercise(id: 'cr1', name: 'Standard Elbow Plank Hold', category: 'Core', sets: 3, reps: '60s hold', restSeconds: '45s'),
+    WorkoutExercise(id: 'cr2', name: 'Russian Twists', category: 'Core', sets: 3, reps: '20 reps', restSeconds: '45s'),
+    WorkoutExercise(id: 'cr3', name: 'Hanging Knee Raises', category: 'Core', sets: 3, reps: '12-15', restSeconds: '45s'),
+    WorkoutExercise(id: 'ht1', name: 'Burpees (Chest-to-Floor)', category: 'HIIT', sets: 4, reps: '40s work', restSeconds: '20s'),
+    WorkoutExercise(id: 'ht2', name: 'Battle Ropes Waves', category: 'HIIT', sets: 4, reps: '30s sprint', restSeconds: '30s'),
+    WorkoutExercise(id: 'ht3', name: 'Kettlebell Swings', category: 'HIIT', sets: 4, reps: '20 reps', restSeconds: '30s'),
   ];
 
-  // Dynamic lists in memory
-  static List<FoodItem> foodDatabase = [...initialFoodDatabase];
-  static List<WorkoutExercise> exerciseMasterList = [...initialExerciseDatabase];
+  static List<FoodItem> foods = [...initialFoodDatabase];
+  static List<WorkoutExercise> exercises = [...initialExerciseDatabase];
 
-  // Load saved custom items from phone storage
-  static Future<void> loadCustomData() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final customFoodsJson = prefs.getStringList('custom_foods_list') ?? [];
-    foodDatabase = [...initialFoodDatabase];
-    for (var raw in customFoodsJson) {
-      try {
-        foodDatabase.add(FoodItem.fromJson(jsonDecode(raw)));
-      } catch (_) {}
+  static Map<String, List<String>> get exercisesByCategory {
+    Map<String, List<String>> map = {};
+    for (var ex in exercises) {
+      if (!map.containsKey(ex.category)) {
+        map[ex.category] = [];
+      }
+      map[ex.category]!.add(ex.name);
     }
-
-    final customExJson = prefs.getStringList('custom_exercises_list') ?? [];
-    exerciseMasterList = [...initialExerciseDatabase];
-    for (var raw in customExJson) {
-      try {
-        exerciseMasterList.add(WorkoutExercise.fromJson(jsonDecode(raw)));
-      } catch (_) {}
-    }
-  }
-
-  // Save new custom food into phone storage
-  static Future<void> addCustomFood(FoodItem food) async {
-    foodDatabase.add(food);
-    final prefs = await SharedPreferences.getInstance();
-    List<String> list = prefs.getStringList('custom_foods_list') ?? [];
-    list.add(jsonEncode(food.toJson()));
-    await prefs.setStringList('custom_foods_list', list);
-  }
-
-  // Save new custom workout exercise into phone storage
-  static Future<void> addCustomExercise(WorkoutExercise exercise) async {
-    exerciseMasterList.add(exercise);
-    final prefs = await SharedPreferences.getInstance();
-    List<String> list = prefs.getStringList('custom_exercises_list') ?? [];
-    list.add(jsonEncode(exercise.toJson()));
-    await prefs.setStringList('custom_exercises_list', list);
+    return map;
   }
 }
