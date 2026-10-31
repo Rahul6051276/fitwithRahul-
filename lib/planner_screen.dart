@@ -2,22 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
+import 'database.dart';
 import 'pdf_service.dart';
 import 'client_overview_screen.dart';
 
 class PlannerScreen extends StatefulWidget {
-  final String initialClientName;
-  final double initialTargetCalories;
-  final String initialGoal;
-  final String initialNotes;
+  final ClientProfile? initialClient;
 
-  const PlannerScreen({
-    Key? key,
-    this.initialClientName = "Client",
-    this.initialTargetCalories = 2000,
-    this.initialGoal = "Fat Loss",
-    this.initialNotes = "Creatine 3-5g daily. Progressive Overload prioritize karein.",
-  }) : super(key: key);
+  const PlannerScreen({Key? key, this.initialClient}) : super(key: key);
 
   @override
   State<PlannerScreen> createState() => _PlannerScreenState();
@@ -26,14 +18,13 @@ class PlannerScreen extends StatefulWidget {
 class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Controllers
   late TextEditingController _clientNameController;
   late TextEditingController _targetCalController;
   late TextEditingController _waterController;
   late TextEditingController _notesController;
 
-  String _fitnessGoal = 'Fat Loss';
-  int _selectedMealIndex = 0; // 0: Meal 1 ... 4: Meal 5
+  late ClientProfile _client;
+  int _selectedMealIndex = 0;
   String _selectedDay = 'Mon';
 
   final FiveMealPlan _dietPlan = FiveMealPlan();
@@ -46,32 +37,64 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     'Sat': [],
   };
 
-  // Pre-loaded Food Database
-  final List<FoodItem> _foodDatabase = [
-    FoodItem(name: "Rolled Oats", calories: 389, protein: 16.9, carbs: 66.3, fats: 6.9, unit: 'g'),
-    FoodItem(name: "Boiled White Rice", calories: 130, protein: 2.7, carbs: 28.2, fats: 0.3, unit: 'g'),
-    FoodItem(name: "Whole Wheat Roti", calories: 120, protein: 3.5, carbs: 22.0, fats: 2.0, unit: 'pcs'),
-    FoodItem(name: "Boiled Egg (Whole)", calories: 78, protein: 6.3, carbs: 0.6, fats: 5.3, unit: 'pcs'),
-    FoodItem(name: "Egg White", calories: 17, protein: 3.6, carbs: 0.2, fats: 0.1, unit: 'pcs'),
-    FoodItem(name: "Soya Chunks (Raw)", calories: 345, protein: 52.0, carbs: 33.0, fats: 0.5, unit: 'g'),
-    FoodItem(name: "Low Fat Paneer", calories: 200, protein: 20.0, carbs: 4.0, fats: 12.0, unit: 'g'),
-    FoodItem(name: "Moong Sprouts", calories: 105, protein: 7.0, carbs: 19.0, fats: 0.4, unit: 'g'),
-    FoodItem(name: "Whey Protein", calories: 120, protein: 24.0, carbs: 2.5, fats: 1.5, unit: 'scoop'),
-    FoodItem(name: "Peanut Butter", calories: 95, protein: 4.0, carbs: 3.0, fats: 8.0, unit: 'tbsp'),
-    FoodItem(name: "Banana (Medium)", calories: 89, protein: 1.1, carbs: 23.0, fats: 0.3, unit: 'pcs'),
-    FoodItem(name: "Dates (Khajoor)", calories: 20, protein: 0.2, carbs: 5.3, fats: 0.1, unit: 'pcs'),
-    FoodItem(name: "Roasted Makhana", calories: 350, protein: 9.7, carbs: 76.0, fats: 0.1, unit: 'g'),
-  ];
+  // Full Database references
+  List<FoodItem> _allFoods = [];
+  Map<String, List<String>> _allExercises = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _clientNameController = TextEditingController(text: widget.initialClientName);
-    _targetCalController = TextEditingController(text: widget.initialTargetCalories.toStringAsFixed(0));
-    _waterController = TextEditingController(text: "3.5 - 4 Liters");
-    _notesController = TextEditingController(text: widget.initialNotes);
-    _fitnessGoal = widget.initialGoal;
+
+    _client = widget.initialClient ??
+        ClientProfile(
+          name: "Client",
+          goal: "Fat Loss",
+          targetCalories: 2000,
+        );
+
+    _clientNameController = TextEditingController(text: _client.name);
+    _targetCalController =
+        TextEditingController(text: _client.targetCalories.toStringAsFixed(0));
+    _waterController = TextEditingController(text: _client.dailyWater);
+
+    String defaultNotes = _client.condition != MedicalCondition.none
+        ? "Medical Profile: ${_client.condition.name.toUpperCase()} (Low-GI carbs priority). Progressive Overload maintain karein."
+        : "Creatine 3-5g daily. Progressive Overload prioritize karein.";
+
+    _notesController = TextEditingController(
+        text: _client.notes.isNotEmpty ? _client.notes : defaultNotes);
+
+    _loadDatabases();
+  }
+
+  void _loadDatabases() {
+    setState(() {
+      try {
+        _allFoods = AppDatabase.foods;
+        _allExercises = AppDatabase.exercisesByCategory;
+      } catch (_) {
+        _allFoods = [
+          FoodItem(name: "Rolled Oats", calories: 389, protein: 16.9, carbs: 66.3, fats: 6.9, unit: 'g'),
+          FoodItem(name: "Boiled White Rice", calories: 130, protein: 2.7, carbs: 28.2, fats: 0.3, unit: 'g'),
+          FoodItem(name: "Whole Wheat Roti", calories: 120, protein: 3.5, carbs: 22.0, fats: 2.0, unit: 'pcs'),
+          FoodItem(name: "Boiled Egg (Whole)", calories: 78, protein: 6.3, carbs: 0.6, fats: 5.3, unit: 'pcs'),
+          FoodItem(name: "Egg White", calories: 17, protein: 3.6, carbs: 0.2, fats: 0.1, unit: 'pcs'),
+          FoodItem(name: "Soya Chunks (Raw)", calories: 345, protein: 52.0, carbs: 33.0, fats: 0.5, unit: 'g'),
+          FoodItem(name: "Low Fat Paneer", calories: 200, protein: 20.0, carbs: 4.0, fats: 12.0, unit: 'g'),
+          FoodItem(name: "Whey Protein", calories: 120, protein: 24.0, carbs: 2.5, fats: 1.5, unit: 'scoop'),
+          FoodItem(name: "Peanut Butter", calories: 95, protein: 4.0, carbs: 3.0, fats: 8.0, unit: 'tbsp'),
+        ];
+        _allExercises = {
+          'Chest': ['Barbell Bench Press', 'Incline DB Press', 'Push-Ups'],
+          'Back': ['Lat Pulldown (Wide)', 'Barbell Bent-Over Row', 'Seated Cable Row'],
+          'Legs': ['Barbell Back Squat', 'Romanian Deadlift', 'Leg Press'],
+          'Shoulders': ['Overhead DB Shoulder Press', 'DB Lateral Raise', 'Cable Face Pulls'],
+          'Arms': ['EZ Bar Bicep Curl', 'Triceps Rope Pushdown'],
+          'Core': ['Plank Hold', 'Russian Twists', 'Mountain Climbers'],
+        };
+      }
+    });
   }
 
   @override
@@ -95,7 +118,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     }
   }
 
-  // --- SAVE & OVERWRITE CLIENT ---
+  // --- SAVE CLIENT RECORD ---
   Future<void> _saveCurrentClient() async {
     final name = _clientNameController.text.trim();
     if (name.isEmpty) {
@@ -105,15 +128,12 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       return;
     }
 
-    final profile = ClientProfile(
-      name: name,
-      goal: _fitnessGoal,
-      targetCalories: double.tryParse(_targetCalController.text) ?? 2000,
-      dailyWater: _waterController.text.trim(),
-      notes: _notesController.text.trim(),
-      dietPlan: _dietPlan,
-      weeklyWorkout: _weeklyWorkout,
-    );
+    _client.name = name;
+    _client.targetCalories = double.tryParse(_targetCalController.text) ?? 2000;
+    _client.dailyWater = _waterController.text.trim();
+    _client.notes = _notesController.text.trim();
+    _client.dietPlan = _dietPlan;
+    _client.weeklyWorkout = _weeklyWorkout;
 
     final prefs = await SharedPreferences.getInstance();
     List<String> savedList = prefs.getStringList('saved_clients_list') ?? [];
@@ -126,7 +146,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
       }
     });
 
-    savedList.insert(0, profile.toJson());
+    savedList.insert(0, _client.toJson());
     await prefs.setStringList('saved_clients_list', savedList);
 
     if (!mounted) return;
@@ -138,7 +158,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- SHOW SAVED CLIENTS LIST ---
+  // --- SAVED CLIENTS LIST VIEW ---
   Future<void> _openSavedClientsList() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> rawList = prefs.getStringList('saved_clients_list') ?? [];
@@ -188,8 +208,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                     final item = profiles[idx];
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: const Color(0xFF0F172A),
@@ -233,12 +251,11 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- LOAD CLIENT INTO BUILDER ---
   void _loadClientIntoBuilder(ClientProfile client) {
     setState(() {
+      _client = client;
       _clientNameController.text = client.name;
       _targetCalController.text = client.targetCalories.toStringAsFixed(0);
-      _fitnessGoal = client.goal;
       _waterController.text = client.dailyWater;
       _notesController.text = client.notes;
 
@@ -258,7 +275,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- WORKOUT SPLIT TEMPLATES ---
+  // --- AUTO-LOAD WORKOUT SPLITS ---
   void _loadWorkoutSplit(String splitName) {
     setState(() {
       _weeklyWorkout.forEach((k, v) => v.clear());
@@ -278,7 +295,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ExerciseEntry(name: "Leg Press", sets: "3", reps: "12", rest: "75s"),
           ExerciseEntry(name: "Lying Leg Curls", sets: "3", reps: "12-15", rest: "60s"),
           ExerciseEntry(name: "Standing Calf Raise", sets: "4", reps: "15-20", rest: "45s"),
-          ExerciseEntry(name: "Incline Treadmill Walk", sets: "1", reps: "20 Mins", rest: "0s"),
         ];
       } else if (splitName == '3-Day') {
         _weeklyWorkout['Mon'] = [
@@ -352,45 +368,179 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- ADD FOOD TO CURRENT MEAL ---
+  // --- ADD FOOD MODAL WITH SEARCH ---
   void _openAddFoodDialog() {
+    String query = '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.65,
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text("Select Food Item", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView.separated(
-                itemCount: _foodDatabase.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (_, idx) {
-                  final food = _foodDatabase[idx];
-                  return ListTile(
-                    title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text("${food.calories.toStringAsFixed(0)} kcal | P: ${food.protein}g | C: ${food.carbs}g | F: ${food.fats}g (${food.unit})"),
-                    trailing: const Icon(Icons.add_circle, color: Color(0xFFF59E0B)),
-                    onTap: () {
-                      setState(() {
-                        double defaultQty = (food.unit == 'pcs' || food.unit == 'tbsp' || food.unit == 'scoop') ? 1.0 : 100.0;
-                        _currentMealList.add(MealEntry(food: food, quantity: defaultQty));
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final filtered = _allFoods
+              .where((f) => f.name.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+
+          return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Search food (Oats, Rice, Egg, Paneer...)",
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    onChanged: (val) {
+                      setModalState(() {
+                        query = val;
                       });
-                      Navigator.pop(ctx);
                     },
-                  );
-                },
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (_, idx) {
+                      final food = filtered[idx];
+                      String unitHint = (food.unit == 'pcs' || food.unit == 'tbsp' || food.unit == 'scoop')
+                          ? "per ${food.unit}"
+                          : "per 100${food.unit}";
+
+                      return ListTile(
+                        title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                        subtitle: Text(
+                          "${food.calories.toStringAsFixed(0)} kcal | P: ${food.protein}g | C: ${food.carbs}g | F: ${food.fats}g ($unitHint)",
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        trailing: const Icon(Icons.add_circle, color: Color(0xFFF59E0B)),
+                        onTap: () {
+                          setState(() {
+                            double defaultQty = (food.unit == 'pcs' || food.unit == 'tbsp' || food.unit == 'scoop') ? 1.0 : 100.0;
+                            _currentMealList.add(MealEntry(food: food, quantity: defaultQty));
+                          });
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // --- ADD EXERCISE MODAL WITH CATEGORY & CUSTOM OPTION ---
+  void _openAddExerciseDialog() {
+    String selectedCategory = _allExercises.keys.isNotEmpty ? _allExercises.keys.first : 'Chest';
+    String selectedExName = (_allExercises[selectedCategory]?.isNotEmpty ?? false)
+        ? _allExercises[selectedCategory]!.first
+        : '';
+
+    final customExCtrl = TextEditingController();
+    final setsCtrl = TextEditingController(text: "3");
+    final repsCtrl = TextEditingController(text: "12");
+    final restCtrl = TextEditingController(text: "60s");
+    bool isCustom = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          List<String> list = _allExercises[selectedCategory] ?? [];
+          return AlertDialog(
+            title: Text("Add Exercise to $_selectedDay", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Select from Database:", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      TextButton(
+                        onPressed: () => setDlgState(() => isCustom = !isCustom),
+                        child: Text(isCustom ? "Pick from List" : "Type Custom", style: const TextStyle(fontSize: 11)),
+                      ),
+                    ],
+                  ),
+                  if (!isCustom) ...[
+                    DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      decoration: const InputDecoration(labelText: "Body Part", isDense: true, border: OutlineInputBorder()),
+                      items: _allExercises.keys.map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontSize: 12)))).toList(),
+                      onChanged: (cat) {
+                        if (cat != null) {
+                          setDlgState(() {
+                            selectedCategory = cat;
+                            selectedExName = (_allExercises[cat]?.isNotEmpty ?? false) ? _allExercises[cat]!.first : '';
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: list.contains(selectedExName) ? selectedExName : (list.isNotEmpty ? list.first : null),
+                      decoration: const InputDecoration(labelText: "Exercise", isDense: true, border: OutlineInputBorder()),
+                      items: list.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 12)))).toList(),
+                      onChanged: (ex) {
+                        if (ex != null) setDlgState(() => selectedExName = ex);
+                      },
+                    ),
+                  ] else ...[
+                    TextField(
+                      controller: customExCtrl,
+                      decoration: const InputDecoration(labelText: "Exercise Name", isDense: true, border: OutlineInputBorder()),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: TextField(controller: setsCtrl, decoration: const InputDecoration(labelText: "Sets", isDense: true, border: OutlineInputBorder()))),
+                      const SizedBox(width: 6),
+                      Expanded(child: TextField(controller: repsCtrl, decoration: const InputDecoration(labelText: "Reps", isDense: true, border: OutlineInputBorder()))),
+                      const SizedBox(width: 6),
+                      Expanded(child: TextField(controller: restCtrl, decoration: const InputDecoration(labelText: "Rest", isDense: true, border: OutlineInputBorder()))),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+                onPressed: () {
+                  String finalName = isCustom ? customExCtrl.text.trim() : selectedExName;
+                  if (finalName.isNotEmpty) {
+                    setState(() {
+                      _weeklyWorkout[_selectedDay]?.add(
+                        ExerciseEntry(
+                          name: finalName,
+                          sets: setsCtrl.text.trim(),
+                          reps: repsCtrl.text.trim(),
+                          rest: restCtrl.text.trim(),
+                        ),
+                      );
+                    });
+                  }
+                  Navigator.pop(ctx);
+                },
+                child: const Text("Add", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -455,7 +605,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 onPressed: () async {
                   await PdfService.generateAndShareDietPdf(
                     clientName: _clientNameController.text.trim(),
-                    fitnessGoal: _fitnessGoal,
+                    fitnessGoal: _client.goal,
                     targetCalories: _targetCalController.text.trim(),
                     dailyWater: _waterController.text.trim(),
                     coachNotes: _notesController.text.trim(),
@@ -477,7 +627,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 onPressed: () async {
                   await PdfService.generateAndShareWorkoutPdf(
                     clientName: _clientNameController.text.trim(),
-                    fitnessGoal: _fitnessGoal,
+                    fitnessGoal: _client.goal,
                     weeklyWorkout: _weeklyWorkout,
                   );
                 },
@@ -494,7 +644,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        // Header Fields
         Row(
           children: [
             Expanded(
@@ -517,7 +666,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 8),
 
-        // Goal selector
         Row(
           children: [
             const Text("Goal: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -526,9 +674,9 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
                 child: ChoiceChip(
                   label: Text(g, style: const TextStyle(fontSize: 11)),
-                  selected: _fitnessGoal == g,
+                  selected: _client.goal == g,
                   selectedColor: const Color(0xFFF59E0B),
-                  onSelected: (v) => setState(() => _fitnessGoal = g),
+                  onSelected: (v) => setState(() => _client.goal = g),
                 ),
               );
             }).toList(),
@@ -536,7 +684,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 8),
 
-        // Water & Notes
         Row(
           children: [
             Expanded(
@@ -599,7 +746,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 12),
 
-        // Meal Selector Buttons (Meal 1 to Meal 5)
+        // Meal Selectors (Meal 1 to 5)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -627,7 +774,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 10),
 
-        // Meal Item Header with Add Button
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -645,7 +791,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 6),
 
-        // Meal Items List View
         if (_currentMealList.isEmpty)
           Container(
             padding: const EdgeInsets.all(24),
@@ -663,7 +808,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    // Food Details
                     Expanded(
                       flex: 3,
                       child: Column(
@@ -677,7 +821,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                         ],
                       ),
                     ),
-                    // Quantity Input
                     SizedBox(
                       width: 55,
                       child: TextFormField(
@@ -696,7 +839,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                       ),
                     ),
                     const SizedBox(width: 6),
-                    // Unit Dropdown (g, pcs, tbsp, scoop)
                     DropdownButton<String>(
                       value: ['g', 'pcs', 'tbsp', 'scoop'].contains(item.food.unit) ? item.food.unit : 'g',
                       isDense: true,
@@ -745,7 +887,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        // Pre-built Split Loading Options
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -787,7 +928,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 12),
 
-        // Day Selector (Mon to Sat)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -807,7 +947,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 10),
 
-        // Exercises for Selected Day
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -819,9 +958,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
               ),
               icon: const Icon(Icons.add, size: 16, color: Colors.black),
               label: const Text("Add Exercise", style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
-              onPressed: () {
-                _openAddExerciseDialog();
-              },
+              onPressed: _openAddExerciseDialog,
             ),
           ],
         ),
@@ -856,56 +993,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             );
           }).toList(),
       ],
-    );
-  }
-
-  void _openAddExerciseDialog() {
-    final nameCtrl = TextEditingController();
-    final setsCtrl = TextEditingController(text: "3");
-    final repsCtrl = TextEditingController(text: "12");
-    final restCtrl = TextEditingController(text: "60s");
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text("Add Exercise to $_selectedDay"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Exercise Name")),
-            Row(
-              children: [
-                Expanded(child: TextField(controller: setsCtrl, decoration: const InputDecoration(labelText: "Sets"))),
-                const SizedBox(width: 8),
-                Expanded(child: TextField(controller: repsCtrl, decoration: const InputDecoration(labelText: "Reps"))),
-                const SizedBox(width: 8),
-                Expanded(child: TextField(controller: restCtrl, decoration: const InputDecoration(labelText: "Rest"))),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              if (nameCtrl.text.trim().isNotEmpty) {
-                setState(() {
-                  _weeklyWorkout[_selectedDay]?.add(
-                    ExerciseEntry(
-                      name: nameCtrl.text.trim(),
-                      sets: setsCtrl.text.trim(),
-                      reps: repsCtrl.text.trim(),
-                      rest: restCtrl.text.trim(),
-                    ),
-                  );
-                });
-              }
-              Navigator.pop(ctx);
-            },
-            child: const Text("Add"),
-          ),
-        ],
-      ),
     );
   }
 }
