@@ -47,7 +47,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
   };
 
   // Pre-loaded Food Database
-  List<FoodItem> _foodDatabase = [
+  final List<FoodItem> _foodDatabase = [
     FoodItem(name: "Rolled Oats", calories: 389, protein: 16.9, carbs: 66.3, fats: 6.9, unit: 'g'),
     FoodItem(name: "Boiled White Rice", calories: 130, protein: 2.7, carbs: 28.2, fats: 0.3, unit: 'g'),
     FoodItem(name: "Whole Wheat Roti", calories: 120, protein: 3.5, carbs: 22.0, fats: 2.0, unit: 'pcs'),
@@ -56,7 +56,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     FoodItem(name: "Soya Chunks (Raw)", calories: 345, protein: 52.0, carbs: 33.0, fats: 0.5, unit: 'g'),
     FoodItem(name: "Low Fat Paneer", calories: 200, protein: 20.0, carbs: 4.0, fats: 12.0, unit: 'g'),
     FoodItem(name: "Moong Sprouts", calories: 105, protein: 7.0, carbs: 19.0, fats: 0.4, unit: 'g'),
-    FoodItem(name: "Whey Protein (1 Scoop)", calories: 120, protein: 24.0, carbs: 2.5, fats: 1.5, unit: 'scoop'),
+    FoodItem(name: "Whey Protein", calories: 120, protein: 24.0, carbs: 2.5, fats: 1.5, unit: 'scoop'),
     FoodItem(name: "Peanut Butter", calories: 95, protein: 4.0, carbs: 3.0, fats: 8.0, unit: 'tbsp'),
     FoodItem(name: "Banana (Medium)", calories: 89, protein: 1.1, carbs: 23.0, fats: 0.3, unit: 'pcs'),
     FoodItem(name: "Dates (Khajoor)", calories: 20, protein: 0.2, carbs: 5.3, fats: 0.1, unit: 'pcs'),
@@ -212,7 +212,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                         ),
                         onTap: () {
                           Navigator.pop(ctx);
-                          // Open Overview Screen
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -664,6 +663,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
+                    // Food Details
                     Expanded(
                       flex: 3,
                       child: Column(
@@ -677,16 +677,16 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                         ],
                       ),
                     ),
+                    // Quantity Input
                     SizedBox(
-                      width: 70,
+                      width: 55,
                       child: TextFormField(
                         initialValue: item.quantity.toStringAsFixed(0),
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          suffixText: item.food.unit,
+                        decoration: const InputDecoration(
                           isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                          border: const OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                          border: OutlineInputBorder(),
                         ),
                         onChanged: (val) {
                           setState(() {
@@ -694,6 +694,34 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                           });
                         },
                       ),
+                    ),
+                    const SizedBox(width: 6),
+                    // Unit Dropdown (g, pcs, tbsp, scoop)
+                    DropdownButton<String>(
+                      value: ['g', 'pcs', 'tbsp', 'scoop'].contains(item.food.unit) ? item.food.unit : 'g',
+                      isDense: true,
+                      underline: const SizedBox(),
+                      items: ['g', 'pcs', 'tbsp', 'scoop'].map((u) {
+                        return DropdownMenuItem(
+                          value: u,
+                          child: Text(u, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        );
+                      }).toList(),
+                      onChanged: (newUnit) {
+                        if (newUnit != null) {
+                          setState(() {
+                            final updatedFood = FoodItem(
+                              name: item.food.name,
+                              calories: item.food.calories,
+                              protein: item.food.protein,
+                              carbs: item.food.carbs,
+                              fats: item.food.fats,
+                              unit: newUnit,
+                            );
+                            _currentMealList[idx] = MealEntry(food: updatedFood, quantity: item.quantity);
+                          });
+                        }
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent, size: 18),
