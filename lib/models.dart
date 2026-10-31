@@ -26,17 +26,19 @@ class FoodItem {
     double? per100gProtein,
     double? per100gCarbs,
     double? per100gFats,
+    double? per100gFat,
     this.unit = 'g',
     this.icon,
   })  : calories = calories ?? per100gCalories ?? 0.0,
         protein = protein ?? per100gProtein ?? 0.0,
         carbs = carbs ?? per100gCarbs ?? 0.0,
-        fats = fats ?? per100gFats ?? 0.0;
+        fats = fats ?? per100gFat ?? per100gFats ?? 0.0;
 
   double get per100gCalories => calories;
   double get per100gProtein => protein;
   double get per100gCarbs => carbs;
   double get per100gFats => fats;
+  double get per100gFat => fats;
 
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -62,6 +64,7 @@ class FoodItem {
         (map['per100gCarbs'] as num?)?.toDouble() ??
         0.0,
     fats: (map['fats'] as num?)?.toDouble() ??
+        (map['per100gFat'] as num?)?.toDouble() ??
         (map['per100gFats'] as num?)?.toDouble() ??
         0.0,
     unit: map['unit'] ?? 'g',
