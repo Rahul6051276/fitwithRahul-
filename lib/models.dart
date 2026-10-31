@@ -18,13 +18,25 @@ class FoodItem {
   FoodItem({
     this.id = '',
     required this.name,
-    required this.calories,
-    required this.protein,
-    required this.carbs,
-    required this.fats,
+    double? calories,
+    double? protein,
+    double? carbs,
+    double? fats,
+    double? per100gCalories,
+    double? per100gProtein,
+    double? per100gCarbs,
+    double? per100gFats,
     this.unit = 'g',
     this.icon,
-  });
+  })  : calories = calories ?? per100gCalories ?? 0.0,
+        protein = protein ?? per100gProtein ?? 0.0,
+        carbs = carbs ?? per100gCarbs ?? 0.0,
+        fats = fats ?? per100gFats ?? 0.0;
+
+  double get per100gCalories => calories;
+  double get per100gProtein => protein;
+  double get per100gCarbs => carbs;
+  double get per100gFats => fats;
 
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -40,10 +52,18 @@ class FoodItem {
   factory FoodItem.fromMap(Map<String, dynamic> map) => FoodItem(
     id: map['id'] ?? '',
     name: map['name'] ?? '',
-    calories: (map['calories'] as num?)?.toDouble() ?? 0.0,
-    protein: (map['protein'] as num?)?.toDouble() ?? 0.0,
-    carbs: (map['carbs'] as num?)?.toDouble() ?? 0.0,
-    fats: (map['fats'] as num?)?.toDouble() ?? 0.0,
+    calories: (map['calories'] as num?)?.toDouble() ??
+        (map['per100gCalories'] as num?)?.toDouble() ??
+        0.0,
+    protein: (map['protein'] as num?)?.toDouble() ??
+        (map['per100gProtein'] as num?)?.toDouble() ??
+        0.0,
+    carbs: (map['carbs'] as num?)?.toDouble() ??
+        (map['per100gCarbs'] as num?)?.toDouble() ??
+        0.0,
+    fats: (map['fats'] as num?)?.toDouble() ??
+        (map['per100gFats'] as num?)?.toDouble() ??
+        0.0,
     unit: map['unit'] ?? 'g',
     icon: map['icon'] != null
         ? IconData(map['icon'] as int, fontFamily: 'MaterialIcons')
@@ -339,6 +359,6 @@ class ClientProfile {
   }
 
   String toJson() => json.encode(toMap());
-  factory ClientProfile.fromJson(dynamic source) =>
+  factory ClientProfile.fromJson(String source) =>
       ClientProfile.fromMap(json.decode(source));
 }
