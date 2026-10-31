@@ -142,7 +142,7 @@ class PdfService {
   static Future<void> generateAndShareWorkoutPdf({
     required String clientName,
     required String fitnessGoal,
-    required Map<String, List<ExerciseEntry>> weeklyWorkout,
+    required Map<String, List<WorkoutExercise>> weeklyWorkout,
   }) async {
     final pdf = pw.Document();
 
@@ -184,9 +184,10 @@ class PdfService {
 
               final tableData = exercises.map<List<String>>((e) => [
                 e.name,
+                e.category,
                 "${e.sets} Sets",
                 e.reps,
-                e.rest,
+                e.restSeconds,
               ]).toList();
 
               return pw.Container(
@@ -207,7 +208,7 @@ class PdfService {
                     ),
                     pw.SizedBox(height: 4),
                     pw.TableHelper.fromTextArray(
-                      headers: ['Exercise Name', 'Sets', 'Reps Target', 'Rest Interval'],
+                      headers: ['Exercise Name', 'Category', 'Sets', 'Reps Target', 'Rest'],
                       data: tableData,
                       headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.white),
                       headerDecoration: pw.BoxDecoration(color: PdfColor.fromHex('#334155')),
