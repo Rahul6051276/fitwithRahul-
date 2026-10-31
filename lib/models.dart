@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-// --- MEDICAL & CLINICAL CONDITIONS ---
+// --- CLINICAL & ENDOCRINE PROFILES ---
 enum MedicalCondition { none, thyroid, pcod, diabetes }
 
 // --- FOOD ITEM MODEL ---
@@ -40,17 +40,31 @@ class FoodItem {
   );
 }
 
-// --- MEAL ENTRY (FOOD + QUANTITY) ---
+// --- MEAL ENTRY WITH ACCURATE UNIT MULTIPLIER ---
 class MealEntry {
   final FoodItem food;
-  double quantity; // Default base 100g ya 1 piece
+  double quantity;
 
   MealEntry({required this.food, this.quantity = 100});
 
-  double get calories => (food.calories * quantity) / 100;
-  double get protein => (food.protein * quantity) / 100;
-  double get carbs => (food.carbs * quantity) / 100;
-  double get fats => (food.fats * quantity) / 100;
+  bool get isPerUnit =>
+      food.unit == 'pcs' || food.unit == 'tbsp' || food.unit == 'scoop';
+
+  double get calories => isPerUnit
+      ? food.calories * quantity
+      : (food.calories * quantity) / 100;
+
+  double get protein => isPerUnit
+      ? food.protein * quantity
+      : (food.protein * quantity) / 100;
+
+  double get carbs => isPerUnit
+      ? food.carbs * quantity
+      : (food.carbs * quantity) / 100;
+
+  double get fats => isPerUnit
+      ? food.fats * quantity
+      : (food.fats * quantity) / 100;
 
   Map<String, dynamic> toMap() => {
     'food': food.toMap(),
@@ -63,7 +77,7 @@ class MealEntry {
   );
 }
 
-// --- 5 MEAL PLAN STRUCTURE ---
+// --- 5 MEAL PLAN MODEL ---
 class FiveMealPlan {
   List<MealEntry> meal1;
   List<MealEntry> meal2;
@@ -160,7 +174,7 @@ class ExerciseEntry {
   );
 }
 
-// --- CLIENT FULL PROFILE (FOR SAVE, OVERVIEW & EDIT) ---
+// --- CLIENT PROFILE (SAVED RECORD & SYNC) ---
 class ClientProfile {
   String name;
   int age;
@@ -169,12 +183,12 @@ class ClientProfile {
   double heightCm;
   double activityMultiplier;
   MedicalCondition condition;
-  String goal; // 'Fat Loss', 'Muscle Gain', 'Body Recomp'
+  String goal;
   double targetCalories;
   String dailyWater;
   String notes;
   FiveMealPlan dietPlan;
-  Map<String, List<ExerciseEntry>> weeklyWorkout; // Mon, Tue, etc.
+  Map<String, List<ExerciseEntry>> weeklyWorkout;
 
   ClientProfile({
     required this.name,
@@ -200,7 +214,6 @@ class ClientProfile {
           'Sat': [],
         };
 
-  // 1. Scientific Base BMR (Mifflin-St Jeor)
   double get baseBmr {
     if (gender == 'Male') {
       return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
@@ -209,26 +222,23 @@ class ClientProfile {
     }
   }
 
-  // 2. Clinical Condition Metabolic Correction Multiplier
   double get conditionMultiplier {
     switch (condition) {
       case MedicalCondition.thyroid:
-        return 0.88; // 12% reduction for slow metabolism
+        return 0.88;
       case MedicalCondition.pcod:
-        return 0.90; // 10% reduction for insulin resistance
+        return 0.90;
       case MedicalCondition.diabetes:
-        return 0.92; // 8% reduction
+        return 0.92;
       case MedicalCondition.none:
       default:
         return 1.0;
     }
   }
 
-  // 3. Adjusted BMR & TDEE
   double get adjustedBmr => baseBmr * conditionMultiplier;
   double get adjustedTdee => adjustedBmr * activityMultiplier;
 
-  // 4. Auto Recommended Target Calories
   double get calculatedTargetCalories {
     switch (goal) {
       case 'Fat Loss':
@@ -241,7 +251,6 @@ class ClientProfile {
     }
   }
 
-  // Serialization for SharedPreferences
   Map<String, dynamic> toMap() => {
     'name': name,
     'age': age,
