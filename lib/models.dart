@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 
 // --- CLINICAL & ENDOCRINE PROFILES ---
 enum MedicalCondition { none, thyroid, pcod, diabetes }
@@ -12,6 +13,7 @@ class FoodItem {
   final double carbs;
   final double fats;
   final String unit; // 'g', 'ml', 'pcs', 'tbsp', 'scoop'
+  final IconData? icon;
 
   FoodItem({
     this.id = '',
@@ -21,6 +23,7 @@ class FoodItem {
     required this.carbs,
     required this.fats,
     this.unit = 'g',
+    this.icon,
   });
 
   Map<String, dynamic> toMap() => {
@@ -31,6 +34,7 @@ class FoodItem {
     'carbs': carbs,
     'fats': fats,
     'unit': unit,
+    'icon': icon?.codePoint,
   };
 
   factory FoodItem.fromMap(Map<String, dynamic> map) => FoodItem(
@@ -41,6 +45,9 @@ class FoodItem {
     carbs: (map['carbs'] as num?)?.toDouble() ?? 0.0,
     fats: (map['fats'] as num?)?.toDouble() ?? 0.0,
     unit: map['unit'] ?? 'g',
+    icon: map['icon'] != null
+        ? IconData(map['icon'] as int, fontFamily: 'MaterialIcons')
+        : null,
   );
 
   String toJson() => json.encode(toMap());
@@ -332,6 +339,6 @@ class ClientProfile {
   }
 
   String toJson() => json.encode(toMap());
-  factory ClientProfile.fromJson(String source) =>
+  factory ClientProfile.fromJson(dynamic source) =>
       ClientProfile.fromMap(json.decode(source));
 }
