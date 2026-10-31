@@ -38,6 +38,14 @@ class FoodItem {
     fats: (map['fats'] as num?)?.toDouble() ?? 0.0,
     unit: map['unit'] ?? 'g',
   );
+
+  String toJson() => json.encode(toMap());
+  factory FoodItem.fromJson(dynamic source) {
+    if (source is String) {
+      return FoodItem.fromMap(json.decode(source));
+    }
+    return FoodItem.fromMap(source as Map<String, dynamic>);
+  }
 }
 
 // --- MEAL ENTRY WITH ACCURATE UNIT MULTIPLIER ---
@@ -145,36 +153,59 @@ class FiveMealPlan {
   );
 }
 
-// --- EXERCISE ENTRY MODEL ---
-class ExerciseEntry {
+// --- WORKOUT EXERCISE (COMPATIBLE WITH DATABASE.DART & PLANNER) ---
+class WorkoutExercise {
+  String id;
   String name;
-  String sets;
+  String category;
+  dynamic sets; // int ya String dono accept karega
   String reps;
-  String rest;
+  String restSeconds;
 
-  ExerciseEntry({
+  WorkoutExercise({
+    this.id = '',
     required this.name,
-    this.sets = '3',
+    this.category = 'General',
+    this.sets = 3,
     this.reps = '12',
-    this.rest = '60s',
+    this.restSeconds = '60s',
   });
 
+  // Getter shortcuts planner_screen ke compatibility ke liye
+  String get setsDisplay => sets.toString();
+  String get rest => restSeconds;
+
   Map<String, dynamic> toMap() => {
+    'id': id,
     'name': name,
+    'category': category,
     'sets': sets,
     'reps': reps,
-    'rest': rest,
+    'restSeconds': restSeconds,
   };
 
-  factory ExerciseEntry.fromMap(Map<String, dynamic> map) => ExerciseEntry(
+  factory WorkoutExercise.fromMap(Map<String, dynamic> map) => WorkoutExercise(
+    id: map['id'] ?? '',
     name: map['name'] ?? '',
-    sets: map['sets'] ?? '3',
+    category: map['category'] ?? 'General',
+    sets: map['sets'] ?? 3,
     reps: map['reps'] ?? '12',
-    rest: map['rest'] ?? '60s',
+    restSeconds: map['restSeconds'] ?? '60s',
   );
+
+  String toJson() => json.encode(toMap());
+  factory WorkoutExercise.fromJson(dynamic source) {
+    if (source is String) {
+      return WorkoutExercise.fromMap(json.decode(source));
+    }
+    return WorkoutExercise.fromMap(source as Map<String, dynamic>);
+  }
 }
 
-// --- CLIENT PROFILE (SAVED RECORD & SYNC) ---
+// Alias taaki purane ExerciseEntry reference se bhi error na aaye
+typedef ExerciseEntry = WorkoutExercise;
+
+// --- CLIENT PROFILE ---
 class ClientProfile {
   String name;
   int age;
@@ -188,7 +219,7 @@ class ClientProfile {
   String dailyWater;
   String notes;
   FiveMealPlan dietPlan;
-  Map<String, List<ExerciseEntry>> weeklyWorkout;
+  Map<String, List<WorkoutExercise>> weeklyWorkout;
 
   ClientProfile({
     required this.name,
@@ -203,7 +234,7 @@ class ClientProfile {
     this.dailyWater = '3.5 - 4 Liters',
     this.notes = 'Creatine 3-5g daily. Progressive Overload prioritize karein.',
     FiveMealPlan? dietPlan,
-    Map<String, List<ExerciseEntry>>? weeklyWorkout,
+    Map<String, List<WorkoutExercise>>? weeklyWorkout,
   })  : dietPlan = dietPlan ?? FiveMealPlan(),
         weeklyWorkout = weeklyWorkout ?? {
           'Mon': [],
@@ -271,10 +302,10 @@ class ClientProfile {
 
   factory ClientProfile.fromMap(Map<String, dynamic> map) {
     var rawWorkout = map['weeklyWorkout'] as Map<String, dynamic>? ?? {};
-    Map<String, List<ExerciseEntry>> workoutMap = {};
+    Map<String, List<WorkoutExercise>> workoutMap = {};
     rawWorkout.forEach((key, val) {
       workoutMap[key] = (val as List? ?? [])
-          .map((e) => ExerciseEntry.fromMap(e))
+          .map((e) => WorkoutExercise.fromMap(e))
           .toList();
     });
 
