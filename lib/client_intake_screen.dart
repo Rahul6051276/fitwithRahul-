@@ -1,62 +1,171 @@
 import 'package:flutter/material.dart';
 import 'models.dart';
-import 'pdf_service.dart';
+import 'planner_screen.dart';
 
-class ClientOverviewScreen extends StatelessWidget {
-  final ClientProfile client;
-  final VoidCallback onEdit;
+class ClientIntakeScreen extends StatefulWidget {
+  const ClientIntakeScreen({Key? key}) : super(key: key);
 
-  const ClientOverviewScreen({
-    Key? key,
-    required this.client,
-    required this.onEdit,
-  }) : super(key: key);
+  @override
+  State<ClientIntakeScreen> createState() => _ClientIntakeScreenState();
+}
 
-  String get _conditionDisplay {
-    switch (client.condition) {
-      case MedicalCondition.thyroid:
-        return "Hypothyroidism (-12% Meta)";
-      case MedicalCondition.pcod:
-        return "PCOD / PCOS (-10% Meta)";
-      case MedicalCondition.diabetes:
-        return "Diabetes Type-2 (-8%)";
-      case MedicalCondition.none:
-      default:
-        return "Normal / Healthy";
-    }
+class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
+  final _nameCtrl = TextEditingController(text: "Rahul Dhruw");
+  final _ageCtrl = TextEditingController(text: "26");
+  final _weightCtrl = TextEditingController(text: "75");
+  final _heightCtrl = TextEditingController(text: "172");
+
+  String _gender = 'Male';
+  double _activity = 1.4;
+  MedicalCondition _condition = MedicalCondition.none;
+  String _goal = 'Fat Loss';
+
+  ClientProfile get _currentAssessment {
+    return ClientProfile(
+      name: _nameCtrl.text.trim(),
+      age: int.tryParse(_ageCtrl.text) ?? 25,
+      gender: _gender,
+      weightKg: double.tryParse(_weightCtrl.text) ?? 70.0,
+      heightCm: double.tryParse(_heightCtrl.text) ?? 170.0,
+      activityMultiplier: _activity,
+      condition: _condition,
+      goal: _goal,
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _ageCtrl.dispose();
+    _weightCtrl.dispose();
+    _heightCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final diet = client.dietPlan;
-    final totalCal = diet.totalCalories;
-    final totalPro = diet.totalProtein;
-    final totalCarb = diet.totalCarbs;
-    final totalFat = diet.totalFats;
+    final client = _currentAssessment;
+    final bmr = client.adjustedBmr;
+    final tdee = client.adjustedTdee;
+    final targetCal = client.calculatedTargetCalories;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
-        title: Text(
-          "${client.name} - Plan Overview",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+        title: const Text(
+          "Clinical Assessment & BMR",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        actions: [
-          IconButton(
-            tooltip: "Edit Plan",
-            icon: const Icon(Icons.edit, color: Color(0xFFF59E0B)),
-            onPressed: () {
-              Navigator.pop(context);
-              onEdit();
-            },
-          ),
-        ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         children: [
-          // 1. CLIENT METRIC & CLINICAL CARD
+          TextField(
+            controller: _nameCtrl,
+            decoration: const InputDecoration(labelText: "Client Full Name", border: OutlineInputBorder(), isDense: true),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _ageCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Age (Years)", border: OutlineInputBorder(), isDense: true),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _gender,
+                  decoration: const InputDecoration(labelText: "Gender", border: OutlineInputBorder(), isDense: true),
+                  items: ['Male', 'Female'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _gender = v);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _weightCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Weight (kg)", border: OutlineInputBorder(), isDense: true),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _heightCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Height (cm)", border: OutlineInputBorder(), isDense: true),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text("Medical / Endocrine Profile:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              ChoiceChip(
+                label: const Text("Normal / Healthy", style: TextStyle(fontSize: 11)),
+                selected: _condition == MedicalCondition.none,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _condition = MedicalCondition.none),
+              ),
+              ChoiceChip(
+                label: const Text("Thyroid (-12% Meta)", style: TextStyle(fontSize: 11)),
+                selected: _condition == MedicalCondition.thyroid,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _condition = MedicalCondition.thyroid),
+              ),
+              ChoiceChip(
+                label: const Text("PCOD / PCOS (-10% Meta)", style: TextStyle(fontSize: 11)),
+                selected: _condition == MedicalCondition.pcod,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _condition = MedicalCondition.pcod),
+              ),
+              ChoiceChip(
+                label: const Text("Diabetes Type-2 (-8%)", style: TextStyle(fontSize: 11)),
+                selected: _condition == MedicalCondition.diabetes,
+                selectedColor: const Color(0xFFF59E0B),
+                onSelected: (_) => setState(() => _condition = MedicalCondition.diabetes),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text("Target Fitness Goal:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
+          const SizedBox(height: 6),
+          Row(
+            children: ['Fat Loss', 'Muscle Gain', 'Body Recomp'].map((g) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: ChoiceChip(
+                  label: Text(g, style: const TextStyle(fontSize: 11)),
+                  selected: _goal == g,
+                  selectedColor: const Color(0xFFF59E0B),
+                  onSelected: (_) => setState(() => _goal = g),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 20),
+
+          // METABOLIC SCIENCE REPORT CARD
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -66,203 +175,54 @@ class ClientOverviewScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      client.name.toUpperCase(),
-                      style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        client.goal.toUpperCase(),
-                        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "Age: ${client.age} yrs | Weight: ${client.weightKg} kg | Height: ${client.heightCm} cm",
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Medical Profile: $_conditionDisplay",
-                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 12, fontWeight: FontWeight.w600),
-                ),
+                const Text("METABOLIC SCIENCE REPORT",
+                    style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
                 const Divider(color: Colors.white24, height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Target Cal: ${client.targetCalories.toStringAsFixed(0)} kcal",
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-                    Text("Actual Plan: ${totalCal.toStringAsFixed(0)} kcal",
-                        style: TextStyle(
-                          color: (totalCal > client.targetCalories + 100)
-                              ? Colors.redAccent
-                              : const Color(0xFF10B981),
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text("Base BMR: ${client.baseBmr.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text("Adjusted BMR: ${bmr.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  "Daily Macros: P: ${totalPro.toStringAsFixed(0)}g | C: ${totalCarb.toStringAsFixed(0)}g | F: ${totalFat.toStringAsFixed(0)}g",
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Maintenance: ${tdee.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text("Target: ${targetCal.toStringAsFixed(0)} kcal",
+                        style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 13)),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
-
-          // 2. MEALS BREAKDOWN
-          _buildMealSection("MEAL 1 (Breakfast)", diet.meal1),
-          _buildMealSection("MEAL 2 (Mid-Morning)", diet.meal2),
-          _buildMealSection("MEAL 3 (Lunch)", diet.meal3),
-          _buildMealSection("MEAL 4 (Evening Snack)", diet.meal4),
-          _buildMealSection("MEAL 5 (Dinner)", diet.meal5),
-
-          // 3. COACH NOTES
-          if (client.notes.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Coach Notes & Hydration:",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF0F172A))),
-                  const SizedBox(height: 4),
-                  Text(client.notes, style: const TextStyle(fontSize: 11, color: Colors.black87)),
-                  const SizedBox(height: 2),
-                  Text("Water Target: ${client.dailyWater}",
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF0284C7))),
-                ],
-              ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF59E0B),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-          ],
-          const SizedBox(height: 80),
-        ],
-      ),
-
-      bottomSheet: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, -2))],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF59E0B),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            icon: const Icon(Icons.arrow_forward, color: Colors.black),
+            label: const Text(
+              "PROCEED TO DIET & WORKOUT BUILDER",
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (ctx) => PlannerScreen(
+                    initialClient: client,
+                  ),
                 ),
-                icon: const Icon(Icons.edit_note, color: Colors.black),
-                label: const Text("EDIT / ADJUST",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
-                onPressed: () {
-                  Navigator.pop(context);
-                  onEdit();
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                ),
-                icon: const Icon(Icons.share, color: Colors.white),
-                label: const Text("SHARE PDF",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                onPressed: () async {
-                  await PdfService.generateAndShareDietPdf(
-                    clientName: client.name,
-                    fitnessGoal: client.goal,
-                    targetCalories: client.targetCalories.toStringAsFixed(0),
-                    dailyWater: client.dailyWater,
-                    coachNotes: client.notes,
-                    plan: client.dietPlan,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMealSection(String title, List<MealEntry> entries) {
-    if (entries.isEmpty) return const SizedBox.shrink();
-
-    double mealCals = entries.fold(0.0, (prev, e) => prev + e.calories);
-    double mealPro = entries.fold(0.0, (prev, e) => prev + e.protein);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
-              Text(
-                "${mealCals.toStringAsFixed(0)} kcal | P: ${mealPro.toStringAsFixed(0)}g",
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFF59E0B)),
-              ),
-            ],
+              );
+            },
           ),
-          const Divider(height: 12),
-          ...entries.map((entry) {
-            String qtyText = entry.food.unit == 'pcs' || entry.food.unit == 'tbsp' || entry.food.unit == 'scoop'
-                ? "${entry.quantity.toStringAsFixed(0)} ${entry.food.unit}"
-                : "${entry.quantity.toStringAsFixed(0)}g";
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.5),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle_outline, size: 14, color: Color(0xFF10B981)),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      "${entry.food.name} ($qtyText)",
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  Text(
-                    "${entry.calories.toStringAsFixed(0)} kcal (P: ${entry.protein.toStringAsFixed(0)}g)",
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
         ],
       ),
     );
