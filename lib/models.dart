@@ -15,7 +15,7 @@ class FoodItem {
   final String unit; // 'g', 'ml', 'pcs', 'tbsp', 'tsp', 'scoop'
   final IconData? icon;
 
-  // Weight measurements in grams
+  // Weight measurements in grams for reference
   final double pieceWeight;
   final double tbspWeight;
   final double tspWeight;
@@ -104,30 +104,32 @@ class FoodItem {
   }
 }
 
-// --- MEAL ENTRY (FOOD + QUANTITY + CONVERSION) ---
+// --- MEAL ENTRY (ACCURATE DIRECT UNIT MULTIPLIER) ---
 class MealEntry {
   final FoodItem food;
   double quantity;
 
   MealEntry({required this.food, this.quantity = 100});
 
-  double get effectiveWeightInGrams {
-    if (food.unit == 'pcs') {
-      return food.pieceWeight > 0 ? quantity * food.pieceWeight : quantity * 100;
-    } else if (food.unit == 'tbsp') {
-      return food.tbspWeight > 0 ? quantity * food.tbspWeight : quantity * 15;
-    } else if (food.unit == 'tsp') {
-      return food.tspWeight > 0 ? quantity * food.tspWeight : quantity * 5;
-    } else if (food.unit == 'scoop') {
-      return food.scoopWeight > 0 ? quantity * food.scoopWeight : quantity * 30;
-    }
-    return quantity;
-  }
+  // Serving units (pcs, tbsp, tsp, scoop) direct multiply honge
+  // Grams aur ml standard (value * quantity) / 100 honge
+  bool get isPerUnit =>
+      food.unit == 'pcs' ||
+      food.unit == 'tbsp' ||
+      food.unit == 'tsp' ||
+      food.unit == 'scoop';
 
-  double get calories => (food.calories * effectiveWeightInGrams) / 100;
-  double get protein => (food.protein * effectiveWeightInGrams) / 100;
-  double get carbs => (food.carbs * effectiveWeightInGrams) / 100;
-  double get fats => (food.fats * effectiveWeightInGrams) / 100;
+  double get calories =>
+      isPerUnit ? (food.calories * quantity) : ((food.calories * quantity) / 100);
+
+  double get protein =>
+      isPerUnit ? (food.protein * quantity) : ((food.protein * quantity) / 100);
+
+  double get carbs =>
+      isPerUnit ? (food.carbs * quantity) : ((food.carbs * quantity) / 100);
+
+  double get fats =>
+      isPerUnit ? (food.fats * quantity) : ((food.fats * quantity) / 100);
 
   Map<String, dynamic> toMap() => {
     'food': food.toMap(),
@@ -384,6 +386,6 @@ class ClientProfile {
   }
 
   String toJson() => json.encode(toMap());
-  factory ClientProfile.fromJson(String source) =>
+  factory ClientProfile.fromJson(dynamic source) =>
       ClientProfile.fromMap(json.decode(source));
 }
