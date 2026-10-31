@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.amber,
         scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       ),
-      home: const ClientIntakeScreen(),
+      home: ClientIntakeScreen(),
     );
   }
 }
