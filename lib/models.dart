@@ -5,6 +5,7 @@ enum MedicalCondition { none, thyroid, pcod, diabetes }
 
 // --- FOOD ITEM MODEL ---
 class FoodItem {
+  final String id;
   final String name;
   final double calories;
   final double protein;
@@ -13,6 +14,7 @@ class FoodItem {
   final String unit; // 'g', 'ml', 'pcs', 'tbsp', 'scoop'
 
   FoodItem({
+    this.id = '',
     required this.name,
     required this.calories,
     required this.protein,
@@ -22,6 +24,7 @@ class FoodItem {
   });
 
   Map<String, dynamic> toMap() => {
+    'id': id,
     'name': name,
     'calories': calories,
     'protein': protein,
@@ -31,6 +34,7 @@ class FoodItem {
   };
 
   factory FoodItem.fromMap(Map<String, dynamic> map) => FoodItem(
+    id: map['id'] ?? '',
     name: map['name'] ?? '',
     calories: (map['calories'] as num?)?.toDouble() ?? 0.0,
     protein: (map['protein'] as num?)?.toDouble() ?? 0.0,
@@ -153,12 +157,12 @@ class FiveMealPlan {
   );
 }
 
-// --- WORKOUT EXERCISE (COMPATIBLE WITH DATABASE.DART & PLANNER) ---
+// --- WORKOUT EXERCISE ---
 class WorkoutExercise {
   String id;
   String name;
   String category;
-  dynamic sets; // int ya String dono accept karega
+  dynamic sets;
   String reps;
   String restSeconds;
 
@@ -171,7 +175,6 @@ class WorkoutExercise {
     this.restSeconds = '60s',
   });
 
-  // Getter shortcuts planner_screen ke compatibility ke liye
   String get setsDisplay => sets.toString();
   String get rest => restSeconds;
 
@@ -202,7 +205,6 @@ class WorkoutExercise {
   }
 }
 
-// Alias taaki purane ExerciseEntry reference se bhi error na aaye
 typedef ExerciseEntry = WorkoutExercise;
 
 // --- CLIENT PROFILE ---
