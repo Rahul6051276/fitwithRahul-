@@ -15,6 +15,11 @@ class FoodItem {
   final String unit; // 'g', 'ml', 'pcs', 'tbsp', 'scoop'
   final IconData? icon;
 
+  // Gram weights for non-gram units
+  final double pieceWeight;
+  final double tbspWeight;
+  final double scoopWeight;
+
   FoodItem({
     this.id = '',
     required this.name,
@@ -29,10 +34,16 @@ class FoodItem {
     double? per100gFat,
     this.unit = 'g',
     this.icon,
+    double? pieceWeight,
+    double? tbspWeight,
+    double? scoopWeight,
   })  : calories = calories ?? per100gCalories ?? 0.0,
         protein = protein ?? per100gProtein ?? 0.0,
         carbs = carbs ?? per100gCarbs ?? 0.0,
-        fats = fats ?? per100gFat ?? per100gFats ?? 0.0;
+        fats = fats ?? per100gFat ?? per100gFats ?? 0.0,
+        pieceWeight = pieceWeight ?? 0.0,
+        tbspWeight = tbspWeight ?? 0.0,
+        scoopWeight = scoopWeight ?? 0.0;
 
   double get per100gCalories => calories;
   double get per100gProtein => protein;
@@ -49,6 +60,9 @@ class FoodItem {
     'fats': fats,
     'unit': unit,
     'icon': icon?.codePoint,
+    'pieceWeight': pieceWeight,
+    'tbspWeight': tbspWeight,
+    'scoopWeight': scoopWeight,
   };
 
   factory FoodItem.fromMap(Map<String, dynamic> map) => FoodItem(
@@ -71,6 +85,9 @@ class FoodItem {
     icon: map['icon'] != null
         ? IconData(map['icon'] as int, fontFamily: 'MaterialIcons')
         : null,
+    pieceWeight: (map['pieceWeight'] as num?)?.toDouble() ?? 0.0,
+    tbspWeight: (map['tbspWeight'] as num?)?.toDouble() ?? 0.0,
+    scoopWeight: (map['scoopWeight'] as num?)?.toDouble() ?? 0.0,
   );
 
   String toJson() => json.encode(toMap());
@@ -82,31 +99,29 @@ class FoodItem {
   }
 }
 
-// --- MEAL ENTRY WITH ACCURATE UNIT MULTIPLIER ---
+// --- MEAL ENTRY WITH UNIT CONVERSION ENGINE ---
 class MealEntry {
   final FoodItem food;
   double quantity;
 
   MealEntry({required this.food, this.quantity = 100});
 
-  bool get isPerUnit =>
-      food.unit == 'pcs' || food.unit == 'tbsp' || food.unit == 'scoop';
+  // Gram equivalent calculation
+  double get effectiveWeightInGrams {
+    if (food.unit == 'pcs') {
+      return food.pieceWeight > 0 ? quantity * food.pieceWeight : quantity * 100;
+    } else if (food.unit == 'tbsp') {
+      return food.tbspWeight > 0 ? quantity * food.tbspWeight : quantity * 15;
+    } else if (food.unit == 'scoop') {
+      return food.scoopWeight > 0 ? quantity * food.scoopWeight : quantity * 30;
+    }
+    return quantity; // Default 'g' or 'ml'
+  }
 
-  double get calories => isPerUnit
-      ? food.calories * quantity
-      : (food.calories * quantity) / 100;
-
-  double get protein => isPerUnit
-      ? food.protein * quantity
-      : (food.protein * quantity) / 100;
-
-  double get carbs => isPerUnit
-      ? food.carbs * quantity
-      : (food.carbs * quantity) / 100;
-
-  double get fats => isPerUnit
-      ? food.fats * quantity
-      : (food.fats * quantity) / 100;
+  double get calories => (food.calories * effectiveWeightInGrams) / 100;
+  double get protein => (food.protein * effectiveWeightInGrams) / 100;
+  double get carbs => (food.carbs * effectiveWeightInGrams) / 100;
+  double get fats => (food.fats * effectiveWeightInGrams) / 100;
 
   Map<String, dynamic> toMap() => {
     'food': food.toMap(),
