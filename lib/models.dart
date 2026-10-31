@@ -223,8 +223,9 @@ class WorkoutExercise {
     this.category = 'General',
     this.sets = 3,
     this.reps = '12',
-    this.restSeconds = '60s',
-  });
+    String? restSeconds,
+    String? rest,
+  }) : restSeconds = restSeconds ?? rest ?? '60s';
 
   String get setsDisplay => sets.toString();
   String get rest => restSeconds;
@@ -244,7 +245,7 @@ class WorkoutExercise {
     category: map['category'] ?? 'General',
     sets: map['sets'] ?? 3,
     reps: map['reps'] ?? '12',
-    restSeconds: map['restSeconds'] ?? '60s',
+    restSeconds: map['restSeconds'] ?? map['rest'] ?? '60s',
   );
 
   String toJson() => json.encode(toMap());
