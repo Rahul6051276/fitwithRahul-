@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-// --- CLINICAL & ENDOCRINE PROFILES ---
+// --- MEDICAL & CLINICAL CONDITIONS ---
 enum MedicalCondition { none, thyroid, pcod, diabetes }
 
 // --- FOOD ITEM MODEL ---
@@ -12,15 +12,16 @@ class FoodItem {
   final double protein;
   final double carbs;
   final double fats;
-  final String unit; // 'g', 'ml', 'pcs', 'tbsp', 'scoop'
+  final String unit; // 'g', 'ml', 'pcs', 'tbsp', 'tsp', 'scoop'
   final IconData? icon;
 
-  // Gram weights for non-gram units
+  // Weight measurements in grams
   final double pieceWeight;
   final double tbspWeight;
+  final double tspWeight;
   final double scoopWeight;
 
-  FoodItem({
+  const FoodItem({
     this.id = '',
     required this.name,
     double? calories,
@@ -36,6 +37,7 @@ class FoodItem {
     this.icon,
     double? pieceWeight,
     double? tbspWeight,
+    double? tspWeight,
     double? scoopWeight,
   })  : calories = calories ?? per100gCalories ?? 0.0,
         protein = protein ?? per100gProtein ?? 0.0,
@@ -43,6 +45,7 @@ class FoodItem {
         fats = fats ?? per100gFat ?? per100gFats ?? 0.0,
         pieceWeight = pieceWeight ?? 0.0,
         tbspWeight = tbspWeight ?? 0.0,
+        tspWeight = tspWeight ?? 0.0,
         scoopWeight = scoopWeight ?? 0.0;
 
   double get per100gCalories => calories;
@@ -62,6 +65,7 @@ class FoodItem {
     'icon': icon?.codePoint,
     'pieceWeight': pieceWeight,
     'tbspWeight': tbspWeight,
+    'tspWeight': tspWeight,
     'scoopWeight': scoopWeight,
   };
 
@@ -87,6 +91,7 @@ class FoodItem {
         : null,
     pieceWeight: (map['pieceWeight'] as num?)?.toDouble() ?? 0.0,
     tbspWeight: (map['tbspWeight'] as num?)?.toDouble() ?? 0.0,
+    tspWeight: (map['tspWeight'] as num?)?.toDouble() ?? 0.0,
     scoopWeight: (map['scoopWeight'] as num?)?.toDouble() ?? 0.0,
   );
 
@@ -99,23 +104,24 @@ class FoodItem {
   }
 }
 
-// --- MEAL ENTRY WITH UNIT CONVERSION ENGINE ---
+// --- MEAL ENTRY (FOOD + QUANTITY + CONVERSION) ---
 class MealEntry {
   final FoodItem food;
   double quantity;
 
   MealEntry({required this.food, this.quantity = 100});
 
-  // Gram equivalent calculation
   double get effectiveWeightInGrams {
     if (food.unit == 'pcs') {
       return food.pieceWeight > 0 ? quantity * food.pieceWeight : quantity * 100;
     } else if (food.unit == 'tbsp') {
       return food.tbspWeight > 0 ? quantity * food.tbspWeight : quantity * 15;
+    } else if (food.unit == 'tsp') {
+      return food.tspWeight > 0 ? quantity * food.tspWeight : quantity * 5;
     } else if (food.unit == 'scoop') {
       return food.scoopWeight > 0 ? quantity * food.scoopWeight : quantity * 30;
     }
-    return quantity; // Default 'g' or 'ml'
+    return quantity;
   }
 
   double get calories => (food.calories * effectiveWeightInGrams) / 100;
@@ -202,16 +208,16 @@ class FiveMealPlan {
   );
 }
 
-// --- WORKOUT EXERCISE ---
+// --- WORKOUT EXERCISE MODEL ---
 class WorkoutExercise {
-  String id;
-  String name;
-  String category;
-  dynamic sets;
-  String reps;
-  String restSeconds;
+  final String id;
+  final String name;
+  final String category;
+  final dynamic sets;
+  final String reps;
+  final String restSeconds;
 
-  WorkoutExercise({
+  const WorkoutExercise({
     this.id = '',
     required this.name,
     this.category = 'General',
@@ -252,7 +258,7 @@ class WorkoutExercise {
 
 typedef ExerciseEntry = WorkoutExercise;
 
-// --- CLIENT PROFILE ---
+// --- CLIENT PROFILE MODEL ---
 class ClientProfile {
   String name;
   int age;
