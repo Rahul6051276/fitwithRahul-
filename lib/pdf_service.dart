@@ -146,13 +146,19 @@ class PdfService {
   }) async {
     final pdf = pw.Document();
 
+    pw.MemoryImage? logoImage;
+    try {
+      final logoBytes = await rootBundle.load('assets/images/coach_rahul.png');
+      logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
+    } catch (_) {}
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(24),
         build: (pw.Context context) {
           return [
-            // HEADER
+            // HEADER WITH LOGO
             pw.Container(
               padding: const pw.EdgeInsets.all(12),
               decoration: pw.BoxDecoration(
@@ -160,18 +166,30 @@ class PdfService {
                 borderRadius: pw.BorderRadius.circular(8),
               ),
               child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text("fitwithRahul - Training Split",
-                          style: pw.TextStyle(color: PdfColor.fromHex('#F59E0B'), fontSize: 15, fontWeight: pw.FontWeight.bold)),
-                      pw.Text("Client: $clientName | Goal: $fitnessGoal",
-                          style: const pw.TextStyle(color: PdfColors.white, fontSize: 10)),
-                    ],
+                  if (logoImage != null)
+                    pw.Container(
+                      width: 45,
+                      height: 45,
+                      decoration: pw.BoxDecoration(
+                        shape: pw.BoxShape.circle,
+                        image: pw.DecorationImage(image: logoImage, fit: pw.BoxFit.cover),
+                      ),
+                    ),
+                  if (logoImage != null) pw.SizedBox(width: 12),
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text("fitwithRahul - Training Split",
+                            style: pw.TextStyle(color: PdfColor.fromHex('#F59E0B'), fontSize: 15, fontWeight: pw.FontWeight.bold)),
+                        pw.Text("Client: $clientName | Goal: $fitnessGoal",
+                            style: const pw.TextStyle(color: PdfColors.white, fontSize: 10)),
+                      ],
+                    ),
                   ),
-                  pw.Text("Weekly Schedule", style: const pw.TextStyle(color: PdfColors.grey400, fontSize: 10)),
+                  pw.Text("Weekly Schedule", style: const pw.TextStyle(color: PdfColors.grey400, fontSize: 9)),
                 ],
               ),
             ),
@@ -236,7 +254,7 @@ class PdfService {
     double totalMealPro = entries.fold(0.0, (prev, e) => prev + e.protein);
 
     final tableData = entries.map<List<String>>((e) {
-      String qtyStr = (e.food.unit == 'pcs' || e.food.unit == 'tbsp' || e.food.unit == 'scoop')
+      String qtyStr = (e.food.unit == 'pcs' || e.food.unit == 'tbsp' || e.food.unit == 'scoop' || e.food.unit == 'tsp')
           ? "${e.quantity.toStringAsFixed(0)} ${e.food.unit}"
           : "${e.quantity.toStringAsFixed(0)}g";
 
@@ -253,7 +271,9 @@ class PdfService {
     return pw.Container(
       margin: const pw.EdgeInsets.only(bottom: 8),
       child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        crossAxisAlignment: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+        ).crossAxisAlignment,
         children: [
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
