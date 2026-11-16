@@ -1,8 +1,11 @@
 name: Build and Release fitwithRahul APK
 
-on:
-  workflow_dispatch:
 
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+  
 permissions:
   contents: write
 
