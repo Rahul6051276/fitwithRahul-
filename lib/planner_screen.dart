@@ -275,13 +275,12 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- FULLY POPULATED MULTI-DAY WORKOUT SPLITS ---
+  // --- AUTO-LOAD WORKOUT SPLITS ---
   void _loadWorkoutSplit(String splitName) {
     setState(() {
       _weeklyWorkout.forEach((k, v) => v.clear());
 
       if (splitName == '2-Day') {
-        // Monday: Upper Body
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "90s"),
           const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "10-12", restSeconds: "75s"),
@@ -291,7 +290,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
           const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
-        // Tuesday: Lower Body
         _weeklyWorkout['Tue'] = [
           const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
           const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "3", reps: "10-12", restSeconds: "90s"),
@@ -301,7 +299,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "3", reps: "60s hold", restSeconds: "45s"),
         ];
       } else if (splitName == '3-Day') {
-        // Monday: Push Day
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "90s"),
           const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "3", reps: "10-12", restSeconds: "75s"),
@@ -309,7 +306,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
           const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
-        // Wednesday: Pull Day
         _weeklyWorkout['Wed'] = [
           const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "10-12", restSeconds: "75s"),
           const WorkoutExercise(name: "Barbell Bent-Over Row", category: "Back", sets: "4", reps: "8-10", restSeconds: "90s"),
@@ -317,7 +313,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Cable Face Pulls", category: "Shoulders", sets: "4", reps: "15", restSeconds: "45s"),
           const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
         ];
-        // Friday: Legs Day
         _weeklyWorkout['Fri'] = [
           const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
           const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "3", reps: "8-10", restSeconds: "90s"),
@@ -326,28 +321,24 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
         ];
       } else if (splitName == '4-Day') {
-        // Monday: Upper A
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "6-8", restSeconds: "90s"),
           const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "Overhead Dumbbell Shoulder Press", category: "Shoulders", sets: "3", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
         ];
-        // Tuesday: Lower A
         _weeklyWorkout['Tue'] = [
           const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
           const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "4", reps: "8-10", restSeconds: "90s"),
           const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
           const WorkoutExercise(name: "Russian Twists", category: "Core", sets: "3", reps: "20 reps", restSeconds: "45s"),
         ];
-        // Thursday: Upper B
         _weeklyWorkout['Thu'] = [
           const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "Seated Cable Row", category: "Back", sets: "4", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
           const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
-        // Friday: Lower B
         _weeklyWorkout['Fri'] = [
           const WorkoutExercise(name: "Leg Press Machine", category: "Legs", sets: "4", reps: "10-12", restSeconds: "75s"),
           const WorkoutExercise(name: "Lying Hamstring Leg Curls", category: "Legs", sets: "4", reps: "12-15", restSeconds: "60s"),
@@ -371,7 +362,53 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: const Color(0xFFF59E0B),
-        content: Text("$splitName Multi-Day Split successfully load ho gaya!"),
+        content: Text("$splitName Split load ho gaya! Din badalane ke liye Move icon dabayein."),
+      ),
+    );
+  }
+
+  // --- MOVE EXERCISE TO ANOTHER DAY DIALOG ---
+  void _showMoveExerciseDialog(WorkoutExercise exercise, String currentDay) {
+    String targetDay = currentDay == 'Mon' ? 'Tue' : 'Mon';
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Move '${exercise.name}'", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        content: StatefulBuilder(
+          builder: (context, setDlgState) => DropdownButtonFormField<String>(
+            value: targetDay,
+            decoration: const InputDecoration(labelText: "Target Day", border: OutlineInputBorder(), isDense: true),
+            items: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) {
+              return DropdownMenuItem(value: d, child: Text(d));
+            }).toList(),
+            onChanged: (val) {
+              if (val != null) setDlgState(() => targetDay = val);
+            },
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+            onPressed: () {
+              setState(() {
+                // Remove from current day
+                _weeklyWorkout[currentDay]?.remove(exercise);
+                // Add to target day
+                if (!_weeklyWorkout.containsKey(targetDay)) {
+                  _weeklyWorkout[targetDay] = [];
+                }
+                _weeklyWorkout[targetDay]?.add(exercise);
+              });
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Exercise ko $targetDay par move kar diya gaya!")),
+              );
+            },
+            child: const Text("Move", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
@@ -606,7 +643,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- ADD EXERCISE MODAL (DATABASE SELECTION + PERMANENT CUSTOM ADDON) ---
+  // --- ADD EXERCISE MODAL ---
   void _openAddExerciseDialog() {
     String selectedCategory = _allExercises.keys.isNotEmpty ? _allExercises.keys.first : 'Chest';
     String selectedExName = (_allExercises[selectedCategory]?.isNotEmpty ?? false)
@@ -1272,13 +1309,23 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                 dense: true,
                 title: Text(ex.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 subtitle: Text("${ex.sets} Sets × ${ex.reps} Reps | Rest: ${ex.restSeconds}"),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.redAccent, size: 18),
-                  onPressed: () {
-                    setState(() {
-                      _weeklyWorkout[_selectedDay]?.removeAt(idx);
-                    });
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.drive_file_move_outlined, color: Color(0xFF0284C7), size: 18),
+                      tooltip: "Move to another day",
+                      onPressed: () => _showMoveExerciseDialog(ex, _selectedDay),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.redAccent, size: 18),
+                      onPressed: () {
+                        setState(() {
+                          _weeklyWorkout[_selectedDay]?.removeAt(idx);
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
             );
