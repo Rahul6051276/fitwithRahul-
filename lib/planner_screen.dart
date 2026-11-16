@@ -275,77 +275,95 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- AUTO-LOAD WORKOUT SPLITS ---
+  // --- FULLY POPULATED MULTI-DAY WORKOUT SPLITS ---
   void _loadWorkoutSplit(String splitName) {
     setState(() {
       _weeklyWorkout.forEach((k, v) => v.clear());
 
       if (splitName == '2-Day') {
+        // Monday: Upper Body
         _weeklyWorkout['Mon'] = [
-          const WorkoutExercise(name: "Barbell Flat Bench Press", sets: "4", reps: "8-10", restSeconds: "90s"),
-          const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", sets: "4", reps: "10-12", restSeconds: "75s"),
-          const WorkoutExercise(name: "Incline Dumbbell Press", sets: "3", reps: "10-12", restSeconds: "60s"),
-          const WorkoutExercise(name: "Seated Cable Row", sets: "3", reps: "10-12", restSeconds: "60s"),
-          const WorkoutExercise(name: "Dumbbell Lateral Raise", sets: "4", reps: "12-15", restSeconds: "45s"),
+          const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "90s"),
+          const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "10-12", restSeconds: "75s"),
+          const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "3", reps: "10-12", restSeconds: "60s"),
+          const WorkoutExercise(name: "Seated Cable Row", category: "Back", sets: "3", reps: "10-12", restSeconds: "60s"),
+          const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
+          const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
+          const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
+        // Tuesday: Lower Body
         _weeklyWorkout['Tue'] = [
-          const WorkoutExercise(name: "Barbell Back Squat", sets: "4", reps: "8-10", restSeconds: "120s"),
-          const WorkoutExercise(name: "Romanian Deadlift (RDL)", sets: "3", reps: "10-12", restSeconds: "90s"),
-          const WorkoutExercise(name: "Leg Press Machine", sets: "3", reps: "12", restSeconds: "75s"),
-          const WorkoutExercise(name: "Standing Calf Raise", sets: "4", reps: "15-20", restSeconds: "45s"),
+          const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
+          const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "3", reps: "10-12", restSeconds: "90s"),
+          const WorkoutExercise(name: "Leg Press Machine", category: "Legs", sets: "3", reps: "12", restSeconds: "75s"),
+          const WorkoutExercise(name: "Lying Hamstring Leg Curls", category: "Legs", sets: "3", reps: "12-15", restSeconds: "60s"),
+          const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
+          const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "3", reps: "60s hold", restSeconds: "45s"),
         ];
       } else if (splitName == '3-Day') {
+        // Monday: Push Day
         _weeklyWorkout['Mon'] = [
-          const WorkoutExercise(name: "Barbell Flat Bench Press", sets: "4", reps: "8-10", restSeconds: "90s"),
-          const WorkoutExercise(name: "Incline Dumbbell Press", sets: "3", reps: "10-12", restSeconds: "75s"),
-          const WorkoutExercise(name: "Overhead Dumbbell Shoulder Press", sets: "4", reps: "8-10", restSeconds: "75s"),
-          const WorkoutExercise(name: "Dumbbell Lateral Raise", sets: "4", reps: "12-15", restSeconds: "45s"),
-          const WorkoutExercise(name: "Triceps Rope Pushdown", sets: "3", reps: "12-15", restSeconds: "60s"),
+          const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "90s"),
+          const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "3", reps: "10-12", restSeconds: "75s"),
+          const WorkoutExercise(name: "Overhead Dumbbell Shoulder Press", category: "Shoulders", sets: "4", reps: "8-10", restSeconds: "75s"),
+          const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
+          const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
+        // Wednesday: Pull Day
         _weeklyWorkout['Wed'] = [
-          const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", sets: "4", reps: "10-12", restSeconds: "75s"),
-          const WorkoutExercise(name: "Barbell Bent-Over Row", sets: "4", reps: "8-10", restSeconds: "90s"),
-          const WorkoutExercise(name: "Seated Cable Row", sets: "3", reps: "10-12", restSeconds: "60s"),
-          const WorkoutExercise(name: "Cable Face Pulls", sets: "4", reps: "15", restSeconds: "45s"),
-          const WorkoutExercise(name: "EZ Bar Bicep Curl", sets: "3", reps: "10-12", restSeconds: "60s"),
+          const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "10-12", restSeconds: "75s"),
+          const WorkoutExercise(name: "Barbell Bent-Over Row", category: "Back", sets: "4", reps: "8-10", restSeconds: "90s"),
+          const WorkoutExercise(name: "Seated Cable Row", category: "Back", sets: "3", reps: "10-12", restSeconds: "60s"),
+          const WorkoutExercise(name: "Cable Face Pulls", category: "Shoulders", sets: "4", reps: "15", restSeconds: "45s"),
+          const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
         ];
+        // Friday: Legs Day
         _weeklyWorkout['Fri'] = [
-          const WorkoutExercise(name: "Barbell Back Squat", sets: "4", reps: "8-10", restSeconds: "120s"),
-          const WorkoutExercise(name: "Romanian Deadlift (RDL)", sets: "3", reps: "8-10", restSeconds: "90s"),
-          const WorkoutExercise(name: "Leg Press Machine", sets: "3", reps: "10-12", restSeconds: "75s"),
-          const WorkoutExercise(name: "Standing Calf Raise", sets: "4", reps: "15-20", restSeconds: "45s"),
+          const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
+          const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "3", reps: "8-10", restSeconds: "90s"),
+          const WorkoutExercise(name: "Leg Press Machine", category: "Legs", sets: "3", reps: "10-12", restSeconds: "75s"),
+          const WorkoutExercise(name: "Lying Hamstring Leg Curls", category: "Legs", sets: "3", reps: "12-15", restSeconds: "60s"),
+          const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
         ];
       } else if (splitName == '4-Day') {
+        // Monday: Upper A
         _weeklyWorkout['Mon'] = [
-          const WorkoutExercise(name: "Barbell Flat Bench Press", sets: "4", reps: "6-8", restSeconds: "90s"),
-          const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", sets: "4", reps: "8-10", restSeconds: "75s"),
-          const WorkoutExercise(name: "Overhead Dumbbell Shoulder Press", sets: "3", reps: "8-10", restSeconds: "75s"),
+          const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "6-8", restSeconds: "90s"),
+          const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "8-10", restSeconds: "75s"),
+          const WorkoutExercise(name: "Overhead Dumbbell Shoulder Press", category: "Shoulders", sets: "3", reps: "8-10", restSeconds: "75s"),
+          const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
         ];
+        // Tuesday: Lower A
         _weeklyWorkout['Tue'] = [
-          const WorkoutExercise(name: "Barbell Back Squat", sets: "4", reps: "8-10", restSeconds: "120s"),
-          const WorkoutExercise(name: "Romanian Deadlift (RDL)", sets: "4", reps: "8-10", restSeconds: "90s"),
-          const WorkoutExercise(name: "Standing Calf Raise", sets: "4", reps: "15-20", restSeconds: "45s"),
+          const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
+          const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "4", reps: "8-10", restSeconds: "90s"),
+          const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
+          const WorkoutExercise(name: "Russian Twists", category: "Core", sets: "3", reps: "20 reps", restSeconds: "45s"),
         ];
+        // Thursday: Upper B
         _weeklyWorkout['Thu'] = [
-          const WorkoutExercise(name: "Incline Dumbbell Press", sets: "4", reps: "8-10", restSeconds: "75s"),
-          const WorkoutExercise(name: "Cable Low-to-High Flyes", sets: "3", reps: "12-15", restSeconds: "60s"),
-          const WorkoutExercise(name: "Dumbbell Lateral Raise", sets: "4", reps: "12-15", restSeconds: "45s"),
+          const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "75s"),
+          const WorkoutExercise(name: "Seated Cable Row", category: "Back", sets: "4", reps: "8-10", restSeconds: "75s"),
+          const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
+          const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
+        // Friday: Lower B
         _weeklyWorkout['Fri'] = [
-          const WorkoutExercise(name: "Seated Cable Row", sets: "4", reps: "10-12", restSeconds: "75s"),
-          const WorkoutExercise(name: "Cable Face Pulls", sets: "4", reps: "15", restSeconds: "45s"),
-          const WorkoutExercise(name: "EZ Bar Bicep Curl", sets: "3", reps: "10-12", restSeconds: "60s"),
+          const WorkoutExercise(name: "Leg Press Machine", category: "Legs", sets: "4", reps: "10-12", restSeconds: "75s"),
+          const WorkoutExercise(name: "Lying Hamstring Leg Curls", category: "Legs", sets: "4", reps: "12-15", restSeconds: "60s"),
+          const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
+          const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "3", reps: "60s hold", restSeconds: "45s"),
         ];
       } else if (splitName == 'HIIT') {
         _weeklyWorkout['Tue'] = [
-          const WorkoutExercise(name: "Burpees (Chest-to-Floor)", sets: "4", reps: "40s work", restSeconds: "20s"),
-          const WorkoutExercise(name: "Standard Push-Ups", sets: "4", reps: "40s work", restSeconds: "60s"),
-          const WorkoutExercise(name: "Russian Twists", sets: "4", reps: "40s work", restSeconds: "20s"),
+          const WorkoutExercise(name: "Burpees (Chest-to-Floor)", category: "HIIT", sets: "4", reps: "40s work", restSeconds: "20s"),
+          const WorkoutExercise(name: "Standard Push-Ups", category: "Chest", sets: "4", reps: "40s work", restSeconds: "60s"),
+          const WorkoutExercise(name: "Russian Twists", category: "Core", sets: "4", reps: "40s work", restSeconds: "20s"),
         ];
         _weeklyWorkout['Sat'] = [
-          const WorkoutExercise(name: "Battle Ropes Waves", sets: "3", reps: "30s sprint", restSeconds: "30s"),
-          const WorkoutExercise(name: "Kettlebell Swings", sets: "3", reps: "20 reps", restSeconds: "30s"),
-          const WorkoutExercise(name: "Standard Elbow Plank Hold", sets: "2", reps: "60s hold", restSeconds: "45s"),
+          const WorkoutExercise(name: "Battle Ropes Waves", category: "HIIT", sets: "3", reps: "30s sprint", restSeconds: "30s"),
+          const WorkoutExercise(name: "Kettlebell Swings", category: "HIIT", sets: "3", reps: "20 reps", restSeconds: "30s"),
+          const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "2", reps: "60s hold", restSeconds: "45s"),
         ];
       }
     });
@@ -353,7 +371,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: const Color(0xFFF59E0B),
-        content: Text("$splitName Workout Template load ho gaya!"),
+        content: Text("$splitName Multi-Day Split successfully load ho gaya!"),
       ),
     );
   }
@@ -1172,6 +1190,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
               const SizedBox(height: 6),
               Wrap(
                 spacing: 6,
+                runSpacing: 6,
                 children: [
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFFF59E0B))),
