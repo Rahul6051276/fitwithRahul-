@@ -64,7 +64,7 @@ class AppDatabase {
     FoodItem(id: 'f50', name: 'Raisins (Per pc)', calories: 1.7, protein: 0.02, carbs: 0.4, fats: 0.003, unit: 'pcs', pieceWeight: 0.5, icon: Icons.grain),
 
     // 51 - 66
-    FoodItem(id: 'f51', name: 'Sugar (Per unit)', calories: 60.0, protein: 0.0, carbs: 15.0, fats: 0.0, unit: 'pcs', pieceWeight: 15.0, icon: Icons.cubes),
+    FoodItem(id: 'f51', name: 'Sugar (Per unit)', calories: 60.0, protein: 0.0, carbs: 15.0, fats: 0.0, unit: 'pcs', pieceWeight: 15.0, icon: Icons.grain),
     FoodItem(id: 'f52', name: 'Jaggery Powder', calories: 382.5, protein: 0.4, carbs: 95.0, fats: 0.1, unit: 'g', icon: Icons.grain),
     FoodItem(id: 'f53', name: 'Besan', calories: 381.9, protein: 22.4, carbs: 58.0, fats: 6.7, unit: 'g', icon: Icons.grain),
     FoodItem(id: 'f54', name: 'Potato', calories: 88.5, protein: 1.9, carbs: 20.0, fats: 0.1, unit: 'g', icon: Icons.circle_outlined),
