@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
@@ -109,12 +108,18 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
 
   List<MealEntry> get _currentMealList {
     switch (_selectedMealIndex) {
-      case 0: return _dietPlan.meal1;
-      case 1: return _dietPlan.meal2;
-      case 2: return _dietPlan.meal3;
-      case 3: return _dietPlan.meal4;
-      case 4: return _dietPlan.meal5;
-      default: return _dietPlan.meal1;
+      case 0:
+        return _dietPlan.meal1;
+      case 1:
+        return _dietPlan.meal2;
+      case 2:
+        return _dietPlan.meal3;
+      case 3:
+        return _dietPlan.meal4;
+      case 4:
+        return _dietPlan.meal5;
+      default:
+        return _dietPlan.meal1;
     }
   }
 
@@ -275,13 +280,12 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     );
   }
 
-  // --- AUTO-LOAD WORKOUT SPLITS ---
+  // --- AUTO-LOAD MULTI-DAY WORKOUT SPLITS ---
   void _loadWorkoutSplit(String splitName) {
     setState(() {
       _weeklyWorkout.forEach((k, v) => v.clear());
 
       if (splitName == '2-Day') {
-        // Monday: Upper Body
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "90s"),
           const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "10-12", restSeconds: "75s"),
@@ -291,7 +295,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
           const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
-        // Tuesday: Lower Body
         _weeklyWorkout['Tue'] = [
           const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
           const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "3", reps: "10-12", restSeconds: "90s"),
@@ -300,8 +303,9 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
           const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "3", reps: "60s hold", restSeconds: "45s"),
         ];
+        _selectedDay = 'Mon';
       } else if (splitName == '3-Day') {
-        // Monday: Push Day
+        // Push Day -> Mon
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "90s"),
           const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "3", reps: "10-12", restSeconds: "75s"),
@@ -309,7 +313,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
           const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
-        // Wednesday: Pull Day
+        // Pull Day -> Wed
         _weeklyWorkout['Wed'] = [
           const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "10-12", restSeconds: "75s"),
           const WorkoutExercise(name: "Barbell Bent-Over Row", category: "Back", sets: "4", reps: "8-10", restSeconds: "90s"),
@@ -317,7 +321,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Cable Face Pulls", category: "Shoulders", sets: "4", reps: "15", restSeconds: "45s"),
           const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
         ];
-        // Friday: Legs Day
+        // Legs Day -> Fri
         _weeklyWorkout['Fri'] = [
           const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
           const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "3", reps: "8-10", restSeconds: "90s"),
@@ -325,35 +329,37 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Lying Hamstring Leg Curls", category: "Legs", sets: "3", reps: "12-15", restSeconds: "60s"),
           const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
         ];
+        _selectedDay = 'Mon';
       } else if (splitName == '4-Day') {
-        // Monday: Upper A
+        // Upper A -> Mon
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(name: "Barbell Flat Bench Press", category: "Chest", sets: "4", reps: "6-8", restSeconds: "90s"),
           const WorkoutExercise(name: "Lat Pulldown (Wide Grip)", category: "Back", sets: "4", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "Overhead Dumbbell Shoulder Press", category: "Shoulders", sets: "3", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "EZ Bar Bicep Curl", category: "Arms", sets: "3", reps: "10-12", restSeconds: "60s"),
         ];
-        // Tuesday: Lower A
+        // Lower A -> Tue
         _weeklyWorkout['Tue'] = [
           const WorkoutExercise(name: "Barbell Back Squat", category: "Legs", sets: "4", reps: "8-10", restSeconds: "120s"),
           const WorkoutExercise(name: "Romanian Deadlift (RDL)", category: "Legs", sets: "4", reps: "8-10", restSeconds: "90s"),
           const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
           const WorkoutExercise(name: "Russian Twists", category: "Core", sets: "3", reps: "20 reps", restSeconds: "45s"),
         ];
-        // Thursday: Upper B
+        // Upper B -> Thu
         _weeklyWorkout['Thu'] = [
           const WorkoutExercise(name: "Incline Dumbbell Press", category: "Chest", sets: "4", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "Seated Cable Row", category: "Back", sets: "4", reps: "8-10", restSeconds: "75s"),
           const WorkoutExercise(name: "Dumbbell Lateral Raise", category: "Shoulders", sets: "4", reps: "12-15", restSeconds: "45s"),
           const WorkoutExercise(name: "Triceps Rope Pushdown", category: "Arms", sets: "3", reps: "12-15", restSeconds: "60s"),
         ];
-        // Friday: Lower B
+        // Lower B -> Fri
         _weeklyWorkout['Fri'] = [
           const WorkoutExercise(name: "Leg Press Machine", category: "Legs", sets: "4", reps: "10-12", restSeconds: "75s"),
           const WorkoutExercise(name: "Lying Hamstring Leg Curls", category: "Legs", sets: "4", reps: "12-15", restSeconds: "60s"),
           const WorkoutExercise(name: "Standing Calf Raise", category: "Legs", sets: "4", reps: "15-20", restSeconds: "45s"),
           const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "3", reps: "60s hold", restSeconds: "45s"),
         ];
+        _selectedDay = 'Mon';
       } else if (splitName == 'HIIT') {
         _weeklyWorkout['Tue'] = [
           const WorkoutExercise(name: "Burpees (Chest-to-Floor)", category: "HIIT", sets: "4", reps: "40s work", restSeconds: "20s"),
@@ -365,21 +371,97 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           const WorkoutExercise(name: "Kettlebell Swings", category: "HIIT", sets: "3", reps: "20 reps", restSeconds: "30s"),
           const WorkoutExercise(name: "Standard Elbow Plank Hold", category: "Core", sets: "2", reps: "60s hold", restSeconds: "45s"),
         ];
+        _selectedDay = 'Tue';
       }
     });
+
+    String summary = splitName == '2-Day'
+        ? "2-Day Split: Mon (Upper) & Tue (Lower)"
+        : splitName == '3-Day'
+            ? "3-Day PPL: Mon (Push), Wed (Pull), Fri (Legs)"
+            : splitName == '4-Day'
+                ? "4-Day Split: Mon/Thu (Upper), Tue/Fri (Lower)"
+                : "HIIT Protocol: Tue & Sat";
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: const Color(0xFFF59E0B),
-        content: Text("$splitName Split load ho gaya! Kisi bhi exercise ko dusre din bhejne ke liye Move button dabayein."),
+        content: Text("$summary load ho gaya! Add Exercise ya Delete se edit karein."),
       ),
     );
   }
 
-  // --- MOVE EXERCISE TO ANOTHER DAY ---
+  // --- MOVE ENTIRE DAY WORKOUT TO ANOTHER DAY ---
+  void _showMoveEntireDayDialog(String sourceDay) {
+    final currentList = List<WorkoutExercise>.from(_weeklyWorkout[sourceDay] ?? []);
+    if (currentList.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("$sourceDay mein move karne ke liye koi workout nahi hai.")),
+      );
+      return;
+    }
+
+    final availableTargets = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        .where((d) => d != sourceDay)
+        .toList();
+    String targetDay = availableTargets.first;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          "Move Entire $sourceDay Workout (${currentList.length} exercises)",
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+        content: StatefulBuilder(
+          builder: (context, setDlgState) => DropdownButtonFormField<String>(
+            value: targetDay,
+            decoration: const InputDecoration(
+              labelText: "Select Target Day",
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            items: availableTargets.map((d) {
+              return DropdownMenuItem(value: d, child: Text(d));
+            }).toList(),
+            onChanged: (val) {
+              if (val != null) setDlgState(() => targetDay = val);
+            },
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF59E0B)),
+            onPressed: () {
+              setState(() {
+                final existingTarget = List<WorkoutExercise>.from(_weeklyWorkout[targetDay] ?? []);
+                _weeklyWorkout[targetDay] = [...existingTarget, ...currentList];
+                _weeklyWorkout[sourceDay] = [];
+                _selectedDay = targetDay;
+              });
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: const Color(0xFF10B981),
+                  content: Text("$sourceDay ka poora workout $targetDay par move ho gaya!"),
+                ),
+              );
+            },
+            child: const Text("Move Day", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- MOVE SINGLE EXERCISE TO ANOTHER DAY ---
   void _showMoveExerciseDialog(WorkoutExercise exercise, String currentDay) {
-    String targetDay = currentDay == 'Mon' ? 'Tue' : 'Mon';
-    
+    final availableTargets = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        .where((d) => d != currentDay)
+        .toList();
+    String targetDay = availableTargets.first;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -388,7 +470,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           builder: (context, setDlgState) => DropdownButtonFormField<String>(
             value: targetDay,
             decoration: const InputDecoration(labelText: "Target Day", border: OutlineInputBorder(), isDense: true),
-            items: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) {
+            items: availableTargets.map((d) {
               return DropdownMenuItem(value: d, child: Text(d));
             }).toList(),
             onChanged: (val) {
@@ -403,9 +485,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
             onPressed: () {
               setState(() {
                 _weeklyWorkout[currentDay]?.remove(exercise);
-                if (!_weeklyWorkout.containsKey(targetDay)) {
-                  _weeklyWorkout[targetDay] = [];
-                }
+                _weeklyWorkout.putIfAbsent(targetDay, () => []);
                 _weeklyWorkout[targetDay]?.add(exercise);
               });
               Navigator.pop(ctx);
@@ -661,7 +741,7 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
     final setsCtrl = TextEditingController(text: "3");
     final repsCtrl = TextEditingController(text: "12");
     final restCtrl = TextEditingController(text: "60s");
-    
+
     bool isCreatingNew = false;
 
     showDialog(
@@ -735,7 +815,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                     ),
                   ),
                   const SizedBox(height: 14),
-
                   DropdownButtonFormField<String>(
                     value: selectedCategory,
                     decoration: const InputDecoration(
@@ -761,7 +840,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                     },
                   ),
                   const SizedBox(height: 10),
-
                   if (!isCreatingNew) ...[
                     DropdownButtonFormField<String>(
                       value: currentExList.contains(selectedExName)
@@ -794,7 +872,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
                     ),
                   ],
                   const SizedBox(height: 12),
-
                   Row(
                     children: [
                       Expanded(
@@ -994,7 +1071,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ],
         ),
         const SizedBox(height: 8),
-
         Row(
           children: [
             const Text("Goal: ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -1012,7 +1088,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ],
         ),
         const SizedBox(height: 8),
-
         Row(
           children: [
             Expanded(
@@ -1031,7 +1106,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ],
         ),
         const SizedBox(height: 12),
-
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -1073,7 +1147,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ),
         ),
         const SizedBox(height: 12),
-
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -1100,7 +1173,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ),
         ),
         const SizedBox(height: 10),
-
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1117,7 +1189,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ],
         ),
         const SizedBox(height: 6),
-
         if (_currentMealList.isEmpty)
           Container(
             padding: const EdgeInsets.all(24),
@@ -1218,6 +1289,8 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
 
   // --- WORKOUT TAB BUILDER ---
   Widget _buildWorkoutTab() {
+    final currentDayExercises = _weeklyWorkout[_selectedDay] ?? [];
+
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
@@ -1262,7 +1335,6 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ),
         ),
         const SizedBox(height: 12),
-
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -1281,32 +1353,50 @@ class _PlannerScreenState extends State<PlannerScreen> with SingleTickerProvider
           ),
         ),
         const SizedBox(height: 10),
-
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text("$_selectedDay Routine", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF59E0B),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              ),
-              icon: const Icon(Icons.add, size: 16, color: Colors.black),
-              label: const Text("Add Exercise", style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
-              onPressed: _openAddExerciseDialog,
+            Row(
+              children: [
+                if (currentDayExercises.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF0284C7)),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      ),
+                      icon: const Icon(Icons.calendar_month, size: 14, color: Color(0xFF0284C7)),
+                      label: const Text(
+                        "Move Day",
+                        style: TextStyle(color: Color(0xFF0284C7), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () => _showMoveEntireDayDialog(_selectedDay),
+                    ),
+                  ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF59E0B),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
+                  icon: const Icon(Icons.add, size: 16, color: Colors.black),
+                  label: const Text("Add Exercise", style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                  onPressed: _openAddExerciseDialog,
+                ),
+              ],
             ),
           ],
         ),
         const SizedBox(height: 6),
-
-        if ((_weeklyWorkout[_selectedDay] ?? []).isEmpty)
+        if (currentDayExercises.isEmpty)
           Container(
             padding: const EdgeInsets.all(24),
             alignment: Alignment.center,
             child: const Text("No exercises for this day (Rest / Active Recovery).", style: TextStyle(color: Colors.grey, fontSize: 12)),
           )
         else
-          ...(_weeklyWorkout[_selectedDay] ?? []).asMap().entries.map((e) {
+          ...currentDayExercises.asMap().entries.map((e) {
             int idx = e.key;
             WorkoutExercise ex = e.value;
 

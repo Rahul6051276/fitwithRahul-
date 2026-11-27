@@ -30,7 +30,7 @@ class PdfService {
         margin: const pw.EdgeInsets.all(24),
         build: (pw.Context context) {
           return [
-            // HEADER
+            // HEADER WITH LOGO
             pw.Container(
               padding: const pw.EdgeInsets.all(12),
               decoration: pw.BoxDecoration(
@@ -91,7 +91,7 @@ class PdfService {
                       pw.Text("Target Calories: $targetCalories kcal",
                           style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: PdfColor.fromHex('#B45309'))),
                       pw.Text("Diet Plan: ${plan.totalCalories.toStringAsFixed(0)} kcal (P: ${plan.totalProtein.toStringAsFixed(0)}g)",
-                          style: const pw.TextStyle(fontSize: 10, color: PdfColors.green800)),
+                          style: const pw.TextStyle(fontSize: 10, color: PdfColor.green800)),
                     ],
                   ),
                 ],
@@ -99,7 +99,7 @@ class PdfService {
             ),
             pw.SizedBox(height: 14),
 
-            // MEALS SECTIONS
+            // MEALS SECTIONS WITH FOOD ICONS
             _buildMealPdfSection("MEAL 1 (Breakfast)", plan.meal1),
             _buildMealPdfSection("MEAL 2 (Mid-Morning)", plan.meal2),
             _buildMealPdfSection("MEAL 3 (Lunch)", plan.meal3),
@@ -201,12 +201,12 @@ class PdfService {
               if (exercises.isEmpty) return pw.SizedBox.shrink();
 
               final tableData = exercises.map<List<String>>((e) => [
-                e.name,
-                e.category,
-                "${e.sets} Sets",
-                e.reps,
-                e.restSeconds,
-              ]).toList();
+                    e.name,
+                    e.category,
+                    "${e.sets} Sets",
+                    e.reps,
+                    e.restSeconds,
+                  ]).toList();
 
               return pw.Container(
                 margin: const pw.EdgeInsets.only(bottom: 12),
@@ -246,6 +246,91 @@ class PdfService {
     await _saveAndShare(pdf, "${clientName.replaceAll(' ', '_')}_WorkoutPlan.pdf");
   }
 
+  // --- VISUAL ICON BADGE FOR PDF FOOD ITEMS ---
+  static pw.Widget _buildFoodIconBadge(String foodName) {
+    final lower = foodName.toLowerCase();
+
+    PdfColor bgColor = PdfColor.fromHex('#FEF3C7');
+    PdfColor dotColor = PdfColor.fromHex('#D97706');
+    String tag = 'FD';
+
+    if (lower.contains('roti') || lower.contains('chapati')) {
+      bgColor = PdfColor.fromHex('#FDE68A');
+      dotColor = PdfColor.fromHex('#B45309');
+      tag = 'RT';
+    } else if (lower.contains('apple') ||
+        lower.contains('banana') ||
+        lower.contains('orange') ||
+        lower.contains('pear') ||
+        lower.contains('papaya') ||
+        lower.contains('guava')) {
+      bgColor = PdfColor.fromHex('#DCFCE7');
+      dotColor = PdfColor.fromHex('#15803D');
+      tag = 'FR';
+    } else if (lower.contains('curd') ||
+        lower.contains('dahi') ||
+        lower.contains('milk') ||
+        lower.contains('butter') ||
+        lower.contains('cheese')) {
+      bgColor = PdfColor.fromHex('#E0F2FE');
+      dotColor = PdfColor.fromHex('#0369A1');
+      tag = 'DY';
+    } else if (lower.contains('egg')) {
+      bgColor = PdfColor.fromHex('#FEF9C3');
+      dotColor = PdfColor.fromHex('#CA8A04');
+      tag = 'EG';
+    } else if (lower.contains('whey') ||
+        lower.contains('soya') ||
+        lower.contains('paneer') ||
+        lower.contains('chicken') ||
+        lower.contains('daal') ||
+        lower.contains('chana') ||
+        lower.contains('beans')) {
+      bgColor = PdfColor.fromHex('#DBEAFE');
+      dotColor = PdfColor.fromHex('#1D4ED8');
+      tag = 'PR';
+    } else if (lower.contains('oil') ||
+        lower.contains('peanut') ||
+        lower.contains('almond') ||
+        lower.contains('seed') ||
+        lower.contains('dates') ||
+        lower.contains('raisins')) {
+      bgColor = PdfColor.fromHex('#FFEDD5');
+      dotColor = PdfColor.fromHex('#C2410C');
+      tag = 'FT';
+    } else if (lower.contains('oats') ||
+        lower.contains('rice') ||
+        lower.contains('daliya') ||
+        lower.contains('poha') ||
+        lower.contains('flakes') ||
+        lower.contains('muesli') ||
+        lower.contains('flour') ||
+        lower.contains('besan')) {
+      bgColor = PdfColor.fromHex('#F3E8FF');
+      dotColor = PdfColor.fromHex('#7E22CE');
+      tag = 'GR';
+    }
+
+    return pw.Container(
+      width: 18,
+      height: 18,
+      decoration: pw.BoxDecoration(
+        color: bgColor,
+        shape: pw.BoxShape.circle,
+        border: pw.Border.all(color: dotColor, width: 0.8),
+      ),
+      alignment: pw.Alignment.center,
+      child: pw.Text(
+        tag,
+        style: pw.TextStyle(
+          fontSize: 6.5,
+          fontWeight: pw.FontWeight.bold,
+          color: dotColor,
+        ),
+      ),
+    );
+  }
+
   // --- HELPER METHODS ---
   static pw.Widget _buildMealPdfSection(String title, List<MealEntry> entries) {
     if (entries.isEmpty) return pw.SizedBox.shrink();
@@ -253,27 +338,10 @@ class PdfService {
     double totalMealCal = entries.fold(0.0, (prev, e) => prev + e.calories);
     double totalMealPro = entries.fold(0.0, (prev, e) => prev + e.protein);
 
-    final tableData = entries.map<List<String>>((e) {
-      String qtyStr = (e.food.unit == 'pcs' || e.food.unit == 'tbsp' || e.food.unit == 'scoop' || e.food.unit == 'tsp')
-          ? "${e.quantity.toStringAsFixed(0)} ${e.food.unit}"
-          : "${e.quantity.toStringAsFixed(0)}g";
-
-      return [
-        e.food.name,
-        qtyStr,
-        "${e.calories.toStringAsFixed(0)} kcal",
-        "${e.protein.toStringAsFixed(1)}g",
-        "${e.carbs.toStringAsFixed(1)}g",
-        "${e.fats.toStringAsFixed(1)}g",
-      ];
-    }).toList();
-
     return pw.Container(
-      margin: const pw.EdgeInsets.only(bottom: 8),
+      margin: const pw.EdgeInsets.only(bottom: 10),
       child: pw.Column(
-        crossAxisAlignment: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-        ).crossAxisAlignment,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -283,15 +351,58 @@ class PdfService {
                   style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#B45309'))),
             ],
           ),
-          pw.SizedBox(height: 3),
-          pw.TableHelper.fromTextArray(
-            headers: ['Food Item', 'Quantity', 'Calories', 'Protein', 'Carbs', 'Fats'],
-            data: tableData,
-            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white),
-            headerDecoration: pw.BoxDecoration(color: PdfColor.fromHex('#1E293B')),
-            cellStyle: const pw.TextStyle(fontSize: 7.5),
-            cellAlignment: pw.Alignment.centerLeft,
-            cellPadding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+          pw.SizedBox(height: 4),
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey300, width: 0.6),
+              borderRadius: pw.BorderRadius.circular(4),
+            ),
+            child: pw.Column(
+              children: [
+                // Table Header
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  decoration: pw.BoxDecoration(color: PdfColor.fromHex('#1E293B')),
+                  child: pw.Row(
+                    children: [
+                      pw.SizedBox(width: 24),
+                      pw.Expanded(flex: 3, child: pw.Text('Food Item', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white))),
+                      pw.Expanded(flex: 1, child: pw.Text('Qty', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white))),
+                      pw.Expanded(flex: 1, child: pw.Text('Calories', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white))),
+                      pw.Expanded(flex: 1, child: pw.Text('Protein', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white))),
+                      pw.Expanded(flex: 1, child: pw.Text('Carbs', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white))),
+                      pw.Expanded(flex: 1, child: pw.Text('Fats', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white))),
+                    ],
+                  ),
+                ),
+                // Rows with Food Icon
+                ...entries.map((e) {
+                  String qtyStr = (e.food.unit == 'pcs' || e.food.unit == 'tbsp' || e.food.unit == 'scoop' || e.food.unit == 'tsp')
+                      ? "${e.quantity.toStringAsFixed(0)} ${e.food.unit}"
+                      : "${e.quantity.toStringAsFixed(0)}g";
+
+                  return pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    decoration: const pw.BoxDecoration(
+                      border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.5)),
+                    ),
+                    child: pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        _buildFoodIconBadge(e.food.name),
+                        pw.SizedBox(width: 6),
+                        pw.Expanded(flex: 3, child: pw.Text(e.food.name, style: const pw.TextStyle(fontSize: 8))),
+                        pw.Expanded(flex: 1, child: pw.Text(qtyStr, style: const pw.TextStyle(fontSize: 8))),
+                        pw.Expanded(flex: 1, child: pw.Text("${e.calories.toStringAsFixed(0)} kcal", style: const pw.TextStyle(fontSize: 8))),
+                        pw.Expanded(flex: 1, child: pw.Text("${e.protein.toStringAsFixed(1)}g", style: const pw.TextStyle(fontSize: 8))),
+                        pw.Expanded(flex: 1, child: pw.Text("${e.carbs.toStringAsFixed(1)}g", style: const pw.TextStyle(fontSize: 8))),
+                        pw.Expanded(flex: 1, child: pw.Text("${e.fats.toStringAsFixed(1)}g", style: const pw.TextStyle(fontSize: 8))),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
           ),
         ],
       ),
@@ -300,13 +411,20 @@ class PdfService {
 
   static String _getDayFullTitle(String day) {
     switch (day) {
-      case 'Mon': return 'MONDAY SESSION';
-      case 'Tue': return 'TUESDAY SESSION';
-      case 'Wed': return 'WEDNESDAY SESSION';
-      case 'Thu': return 'THURSDAY SESSION';
-      case 'Fri': return 'FRIDAY SESSION';
-      case 'Sat': return 'SATURDAY SESSION';
-      default: return '$day SESSION';
+      case 'Mon':
+        return 'MONDAY SESSION';
+      case 'Tue':
+        return 'TUESDAY SESSION';
+      case 'Wed':
+        return 'WEDNESDAY SESSION';
+      case 'Thu':
+        return 'THURSDAY SESSION';
+      case 'Fri':
+        return 'FRIDAY SESSION';
+      case 'Sat':
+        return 'SATURDAY SESSION';
+      default:
+        return '$day SESSION';
     }
   }
 

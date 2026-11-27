@@ -55,45 +55,45 @@ class FoodItem {
   double get per100gFat => fats;
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'calories': calories,
-    'protein': protein,
-    'carbs': carbs,
-    'fats': fats,
-    'unit': unit,
-    'icon': icon?.codePoint,
-    'pieceWeight': pieceWeight,
-    'tbspWeight': tbspWeight,
-    'tspWeight': tspWeight,
-    'scoopWeight': scoopWeight,
-  };
+        'id': id,
+        'name': name,
+        'calories': calories,
+        'protein': protein,
+        'carbs': carbs,
+        'fats': fats,
+        'unit': unit,
+        'icon': icon?.codePoint,
+        'pieceWeight': pieceWeight,
+        'tbspWeight': tbspWeight,
+        'tspWeight': tspWeight,
+        'scoopWeight': scoopWeight,
+      };
 
   factory FoodItem.fromMap(Map<String, dynamic> map) => FoodItem(
-    id: map['id'] ?? '',
-    name: map['name'] ?? '',
-    calories: (map['calories'] as num?)?.toDouble() ??
-        (map['per100gCalories'] as num?)?.toDouble() ??
-        0.0,
-    protein: (map['protein'] as num?)?.toDouble() ??
-        (map['per100gProtein'] as num?)?.toDouble() ??
-        0.0,
-    carbs: (map['carbs'] as num?)?.toDouble() ??
-        (map['per100gCarbs'] as num?)?.toDouble() ??
-        0.0,
-    fats: (map['fats'] as num?)?.toDouble() ??
-        (map['per100gFat'] as num?)?.toDouble() ??
-        (map['per100gFats'] as num?)?.toDouble() ??
-        0.0,
-    unit: map['unit'] ?? 'g',
-    icon: map['icon'] != null
-        ? IconData(map['icon'] as int, fontFamily: 'MaterialIcons')
-        : null,
-    pieceWeight: (map['pieceWeight'] as num?)?.toDouble() ?? 0.0,
-    tbspWeight: (map['tbspWeight'] as num?)?.toDouble() ?? 0.0,
-    tspWeight: (map['tspWeight'] as num?)?.toDouble() ?? 0.0,
-    scoopWeight: (map['scoopWeight'] as num?)?.toDouble() ?? 0.0,
-  );
+        id: map['id'] ?? '',
+        name: map['name'] ?? '',
+        calories: (map['calories'] as num?)?.toDouble() ??
+            (map['per100gCalories'] as num?)?.toDouble() ??
+            0.0,
+        protein: (map['protein'] as num?)?.toDouble() ??
+            (map['per100gProtein'] as num?)?.toDouble() ??
+            0.0,
+        carbs: (map['carbs'] as num?)?.toDouble() ??
+            (map['per100gCarbs'] as num?)?.toDouble() ??
+            0.0,
+        fats: (map['fats'] as num?)?.toDouble() ??
+            (map['per100gFat'] as num?)?.toDouble() ??
+            (map['per100gFats'] as num?)?.toDouble() ??
+            0.0,
+        unit: map['unit'] ?? 'g',
+        icon: map['icon'] != null
+            ? IconData(map['icon'] as int, fontFamily: 'MaterialIcons')
+            : null,
+        pieceWeight: (map['pieceWeight'] as num?)?.toDouble() ?? 0.0,
+        tbspWeight: (map['tbspWeight'] as num?)?.toDouble() ?? 0.0,
+        tspWeight: (map['tspWeight'] as num?)?.toDouble() ?? 0.0,
+        scoopWeight: (map['scoopWeight'] as num?)?.toDouble() ?? 0.0,
+      );
 
   String toJson() => json.encode(toMap());
   factory FoodItem.fromJson(dynamic source) {
@@ -104,15 +104,13 @@ class FoodItem {
   }
 }
 
-// --- MEAL ENTRY (ACCURATE DIRECT UNIT MULTIPLIER) ---
+// --- MEAL ENTRY (ACCURATE UNIT MULTIPLIER) ---
 class MealEntry {
   final FoodItem food;
   double quantity;
 
   MealEntry({required this.food, this.quantity = 100});
 
-  // Serving units (pcs, tbsp, tsp, scoop) direct multiply honge
-  // Grams aur ml standard (value * quantity) / 100 honge
   bool get isPerUnit =>
       food.unit == 'pcs' ||
       food.unit == 'tbsp' ||
@@ -132,14 +130,14 @@ class MealEntry {
       isPerUnit ? (food.fats * quantity) : ((food.fats * quantity) / 100);
 
   Map<String, dynamic> toMap() => {
-    'food': food.toMap(),
-    'quantity': quantity,
-  };
+        'food': food.toMap(),
+        'quantity': quantity,
+      };
 
   factory MealEntry.fromMap(Map<String, dynamic> map) => MealEntry(
-    food: FoodItem.fromMap(map['food']),
-    quantity: (map['quantity'] as num?)?.toDouble() ?? 100.0,
-  );
+        food: FoodItem.fromMap(map['food']),
+        quantity: (map['quantity'] as num?)?.toDouble() ?? 100.0,
+      );
 }
 
 // --- 5 MEAL PLAN MODEL ---
@@ -194,20 +192,20 @@ class FiveMealPlan {
       list.fold(0.0, (prev, elem) => prev + selector(elem));
 
   Map<String, dynamic> toMap() => {
-    'meal1': meal1.map((e) => e.toMap()).toList(),
-    'meal2': meal2.map((e) => e.toMap()).toList(),
-    'meal3': meal3.map((e) => e.toMap()).toList(),
-    'meal4': meal4.map((e) => e.toMap()).toList(),
-    'meal5': meal5.map((e) => e.toMap()).toList(),
-  };
+        'meal1': meal1.map((e) => e.toMap()).toList(),
+        'meal2': meal2.map((e) => e.toMap()).toList(),
+        'meal3': meal3.map((e) => e.toMap()).toList(),
+        'meal4': meal4.map((e) => e.toMap()).toList(),
+        'meal5': meal5.map((e) => e.toMap()).toList(),
+      };
 
   factory FiveMealPlan.fromMap(Map<String, dynamic> map) => FiveMealPlan(
-    meal1: (map['meal1'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
-    meal2: (map['meal2'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
-    meal3: (map['meal3'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
-    meal4: (map['meal4'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
-    meal5: (map['meal5'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
-  );
+        meal1: (map['meal1'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
+        meal2: (map['meal2'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
+        meal3: (map['meal3'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
+        meal4: (map['meal4'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
+        meal5: (map['meal5'] as List? ?? []).map((e) => MealEntry.fromMap(e)).toList(),
+      );
 }
 
 // --- WORKOUT EXERCISE MODEL ---
@@ -233,22 +231,22 @@ class WorkoutExercise {
   String get rest => restSeconds;
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'category': category,
-    'sets': sets,
-    'reps': reps,
-    'restSeconds': restSeconds,
-  };
+        'id': id,
+        'name': name,
+        'category': category,
+        'sets': sets,
+        'reps': reps,
+        'restSeconds': restSeconds,
+      };
 
   factory WorkoutExercise.fromMap(Map<String, dynamic> map) => WorkoutExercise(
-    id: map['id'] ?? '',
-    name: map['name'] ?? '',
-    category: map['category'] ?? 'General',
-    sets: map['sets'] ?? 3,
-    reps: map['reps'] ?? '12',
-    restSeconds: map['restSeconds'] ?? map['rest'] ?? '60s',
-  );
+        id: map['id'] ?? '',
+        name: map['name'] ?? '',
+        category: map['category'] ?? 'General',
+        sets: map['sets'] ?? 3,
+        reps: map['reps'] ?? '12',
+        restSeconds: map['restSeconds'] ?? map['rest'] ?? '60s',
+      );
 
   String toJson() => json.encode(toMap());
   factory WorkoutExercise.fromJson(dynamic source) {
@@ -292,14 +290,15 @@ class ClientProfile {
     FiveMealPlan? dietPlan,
     Map<String, List<WorkoutExercise>>? weeklyWorkout,
   })  : dietPlan = dietPlan ?? FiveMealPlan(),
-        weeklyWorkout = weeklyWorkout ?? {
-          'Mon': [],
-          'Tue': [],
-          'Wed': [],
-          'Thu': [],
-          'Fri': [],
-          'Sat': [],
-        };
+        weeklyWorkout = weeklyWorkout ??
+            {
+              'Mon': [],
+              'Tue': [],
+              'Wed': [],
+              'Thu': [],
+              'Fri': [],
+              'Sat': [],
+            };
 
   double get baseBmr {
     if (gender == 'Male') {
@@ -339,22 +338,22 @@ class ClientProfile {
   }
 
   Map<String, dynamic> toMap() => {
-    'name': name,
-    'age': age,
-    'gender': gender,
-    'weightKg': weightKg,
-    'heightCm': heightCm,
-    'activityMultiplier': activityMultiplier,
-    'condition': condition.name,
-    'goal': goal,
-    'targetCalories': targetCalories,
-    'dailyWater': dailyWater,
-    'notes': notes,
-    'dietPlan': dietPlan.toMap(),
-    'weeklyWorkout': weeklyWorkout.map(
-      (k, v) => MapEntry(k, v.map((e) => e.toMap()).toList()),
-    ),
-  };
+        'name': name,
+        'age': age,
+        'gender': gender,
+        'weightKg': weightKg,
+        'heightCm': heightCm,
+        'activityMultiplier': activityMultiplier,
+        'condition': condition.name,
+        'goal': goal,
+        'targetCalories': targetCalories,
+        'dailyWater': dailyWater,
+        'notes': notes,
+        'dietPlan': dietPlan.toMap(),
+        'weeklyWorkout': weeklyWorkout.map(
+          (k, v) => MapEntry(k, v.map((e) => e.toMap()).toList()),
+        ),
+      };
 
   factory ClientProfile.fromMap(Map<String, dynamic> map) {
     var rawWorkout = map['weeklyWorkout'] as Map<String, dynamic>? ?? {};
