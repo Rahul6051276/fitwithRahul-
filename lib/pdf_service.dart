@@ -91,7 +91,7 @@ class PdfService {
                       pw.Text("Target Calories: $targetCalories kcal",
                           style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11, color: PdfColor.fromHex('#B45309'))),
                       pw.Text("Diet Plan: ${plan.totalCalories.toStringAsFixed(0)} kcal (P: ${plan.totalProtein.toStringAsFixed(0)}g)",
-                          style: const pw.TextStyle(fontSize: 10, color: PdfColor.green800)),
+                          style: const pw.TextStyle(fontSize: 10, color: PdfColors.green800)),
                     ],
                   ),
                 ],
