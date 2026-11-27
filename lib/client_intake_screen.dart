@@ -85,11 +85,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
         children: [
           TextField(
             controller: _nameCtrl,
-            decoration: const InputDecoration(
-              labelText: "Client Name",
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+            decoration: const InputDecoration(labelText: "Client Name", border: OutlineInputBorder(), isDense: true),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 10),
@@ -99,11 +95,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
                 child: TextField(
                   controller: _ageCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: "Age (yrs)",
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
+                  decoration: const InputDecoration(labelText: "Age (yrs)", border: OutlineInputBorder(), isDense: true),
                   onChanged: (_) => setState(() {}),
                 ),
               ),
@@ -112,11 +104,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
                 child: TextField(
                   controller: _weightCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: "Weight (kg)",
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
+                  decoration: const InputDecoration(labelText: "Weight (kg)", border: OutlineInputBorder(), isDense: true),
                   onChanged: (_) => setState(() {}),
                 ),
               ),
@@ -125,11 +113,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
                 child: TextField(
                   controller: _heightCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: "Height (cm)",
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
+                  decoration: const InputDecoration(labelText: "Height (cm)", border: OutlineInputBorder(), isDense: true),
                   onChanged: (_) => setState(() {}),
                 ),
               ),
@@ -172,16 +156,9 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
           const SizedBox(height: 10),
           DropdownButtonFormField<MedicalCondition>(
             value: _condition,
-            decoration: const InputDecoration(
-              labelText: "Medical / Endocrine Profile",
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+            decoration: const InputDecoration(labelText: "Medical / Endocrine Profile", border: OutlineInputBorder(), isDense: true),
             items: MedicalCondition.values.map((c) {
-              return DropdownMenuItem(
-                value: c,
-                child: Text(c.name.toUpperCase(), style: const TextStyle(fontSize: 12)),
-              );
+              return DropdownMenuItem(value: c, child: Text(c.name.toUpperCase(), style: const TextStyle(fontSize: 12)));
             }).toList(),
             onChanged: (val) {
               if (val != null) setState(() => _condition = val);
@@ -190,11 +167,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
           const SizedBox(height: 10),
           DropdownButtonFormField<double>(
             value: _activityMultiplier,
-            decoration: const InputDecoration(
-              labelText: "Activity Multiplier",
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+            decoration: const InputDecoration(labelText: "Activity Multiplier", border: OutlineInputBorder(), isDense: true),
             items: const [
               DropdownMenuItem(value: 1.2, child: Text("1.2 - Sedentary", style: TextStyle(fontSize: 12))),
               DropdownMenuItem(value: 1.4, child: Text("1.4 - Light / Active", style: TextStyle(fontSize: 12))),
@@ -208,43 +181,25 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
           const SizedBox(height: 10),
           TextField(
             controller: _waterCtrl,
-            decoration: const InputDecoration(
-              labelText: "Daily Water",
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+            decoration: const InputDecoration(labelText: "Daily Water", border: OutlineInputBorder(), isDense: true),
           ),
           const SizedBox(height: 10),
           TextField(
             controller: _notesCtrl,
-            decoration: const InputDecoration(
-              labelText: "Coach Notes",
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+            decoration: const InputDecoration(labelText: "Coach Notes", border: OutlineInputBorder(), isDense: true),
           ),
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(10),
-            ),
+            decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(10)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Estimated TDEE: ${previewProfile.adjustedTdee.toStringAsFixed(0)} kcal",
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
+                Text("Estimated TDEE: ${previewProfile.adjustedTdee.toStringAsFixed(0)} kcal", style: const TextStyle(color: Colors.white70, fontSize: 12)),
                 const SizedBox(height: 4),
                 Text(
                   "Recommended Target: ${previewProfile.calculatedTargetCalories.toStringAsFixed(0)} kcal",
-                  style: const TextStyle(
-                    color: Color(0xFFF59E0B),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
+                  style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ],
             ),
@@ -259,10 +214,7 @@ class _ClientIntakeScreenState extends State<ClientIntakeScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               icon: const Icon(Icons.arrow_forward, color: Colors.black),
-              label: const Text(
-                "Continue to Diet & Workout Builder",
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
+              label: const Text("Continue to Diet & Workout Builder", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               onPressed: _proceedToPlanner,
             ),
           ),
