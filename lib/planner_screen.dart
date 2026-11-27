@@ -468,7 +468,6 @@ class _PlannerScreenState extends State<PlannerScreen>
       _weeklyWorkout.forEach((k, v) => v.clear());
 
       if (splitName == '2-Day') {
-        // Upper Body (Mon) & Lower Body (Tue)
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(
               name: 'Barbell Flat Bench Press',
@@ -553,7 +552,6 @@ class _PlannerScreenState extends State<PlannerScreen>
         ];
         _selectedDay = 'Mon';
       } else if (splitName == '3-Day') {
-        // Push (Mon), Pull (Wed), Legs (Fri)
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(
               name: 'Barbell Flat Bench Press',
@@ -652,7 +650,6 @@ class _PlannerScreenState extends State<PlannerScreen>
         ];
         _selectedDay = 'Mon';
       } else if (splitName == '4-Day') {
-        // Upper A (Mon), Lower A (Tue), Upper B (Thu), Lower B (Fri)
         _weeklyWorkout['Mon'] = [
           const WorkoutExercise(
               name: 'Barbell Flat Bench Press',
@@ -942,7 +939,7 @@ class _PlannerScreenState extends State<PlannerScreen>
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
           final filtered = _allFoods
@@ -954,12 +951,16 @@ class _PlannerScreenState extends State<PlannerScreen>
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
                   child: TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Search food (Oats, Rice, Egg, Paneer...)',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       isDense: true,
                     ),
                     onChanged: (val) => setModalState(() => query = val),
@@ -1042,6 +1043,7 @@ class _PlannerScreenState extends State<PlannerScreen>
                           label:
                               const Text('Database', style: TextStyle(fontSize: 11)),
                           selected: !isCreatingNew,
+                          selectedColor: const Color(0xFFF59E0B),
                           onSelected: (_) =>
                               setDlgState(() => isCreatingNew = false),
                         ),
@@ -1052,6 +1054,7 @@ class _PlannerScreenState extends State<PlannerScreen>
                           label:
                               const Text('+ New', style: TextStyle(fontSize: 11)),
                           selected: isCreatingNew,
+                          selectedColor: const Color(0xFFF59E0B),
                           onSelected: (_) =>
                               setDlgState(() => isCreatingNew = true),
                         ),
@@ -1177,15 +1180,36 @@ class _PlannerScreenState extends State<PlannerScreen>
     );
   }
 
+  InputDecoration _premiumInputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
+      filled: true,
+      fillColor: const Color(0xFFF8FAFC),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(9),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(9),
+        borderSide: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double planCal = _dietPlan.totalCalories;
     final double targetCal = double.tryParse(_targetCalController.text) ?? 2000;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: const Color(0xFF0F172A),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text('fitwithRahul Builder',
             style: TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
@@ -1200,6 +1224,7 @@ class _PlannerScreenState extends State<PlannerScreen>
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: const Color(0xFFF59E0B),
+          indicatorWeight: 3,
           labelColor: const Color(0xFFF59E0B),
           unselectedLabelColor: Colors.white60,
           tabs: const [
@@ -1216,15 +1241,28 @@ class _PlannerScreenState extends State<PlannerScreen>
         ],
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        color: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: const Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
         child: Row(
           children: [
             Expanded(
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    padding: const EdgeInsets.symmetric(vertical: 12)),
+                  backgroundColor: const Color(0xFF10B981),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
                 icon: const Icon(Icons.share, color: Colors.white, size: 18),
                 label: const Text('Share Diet PDF',
                     style: TextStyle(
@@ -1247,8 +1285,11 @@ class _PlannerScreenState extends State<PlannerScreen>
             Expanded(
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0284C7),
-                    padding: const EdgeInsets.symmetric(vertical: 12)),
+                  backgroundColor: const Color(0xFF0284C7),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
                 icon: const Icon(Icons.sports_gymnastics,
                     color: Colors.white, size: 18),
                 label: const Text('Share Workout PDF',
@@ -1279,87 +1320,163 @@ class _PlannerScreenState extends State<PlannerScreen>
       _dietPlan.meal4,
       _dietPlan.meal5,
     ];
+    final double remainingCal = targetCal - planCal;
 
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: TextField(
-                controller: _clientNameController,
-                decoration: const InputDecoration(
-                    labelText: 'Client Name',
-                    border: OutlineInputBorder(),
-                    isDense: true),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _targetCalController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                    labelText: 'Target Cal',
-                    border: OutlineInputBorder(),
-                    isDense: true),
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
+        // CLIENT & TARGET CARD
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(8)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                  '${planCal.toStringAsFixed(0)} / ${targetCal.toStringAsFixed(0)} kcal',
-                  style: const TextStyle(
-                      color: Color(0xFFF59E0B), fontWeight: FontWeight.bold)),
-              Text('P: ${_dietPlan.totalProtein.toStringAsFixed(0)}g',
-                  style: const TextStyle(color: Colors.white)),
-              Text('C: ${_dietPlan.totalCarbs.toStringAsFixed(0)}g',
-                  style: const TextStyle(color: Colors.white)),
-              Text('F: ${_dietPlan.totalFats.toStringAsFixed(0)}g',
-                  style: const TextStyle(color: Colors.white)),
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _clientNameController,
+                  decoration: _premiumInputDecoration('Client Name'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _targetCalController,
+                  keyboardType: TextInputType.number,
+                  decoration: _premiumInputDecoration('Target Cal'),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 10),
+
+        // PREMIUM MACRO BANNER
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.45)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${planCal.toStringAsFixed(0)} / ${targetCal.toStringAsFixed(0)} kcal',
+                    style: const TextStyle(
+                      color: Color(0xFFF59E0B),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: remainingCal >= 0
+                          ? const Color(0xFF10B981).withOpacity(0.18)
+                          : const Color(0xFFEF4444).withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      remainingCal >= 0
+                          ? '${remainingCal.toStringAsFixed(0)} kcal left'
+                          : '${remainingCal.abs().toStringAsFixed(0)} kcal over',
+                      style: TextStyle(
+                        color: remainingCal >= 0
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFFF87171),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _macroPill('Protein',
+                      '${_dietPlan.totalProtein.toStringAsFixed(0)}g'),
+                  _macroPill(
+                      'Carbs', '${_dietPlan.totalCarbs.toStringAsFixed(0)}g'),
+                  _macroPill('Fats', '${_dietPlan.totalFats.toStringAsFixed(0)}g'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // MEAL CHIPS
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: List.generate(5, (index) {
               final count = mealLists[index].length;
+              final active = _selectedMealIndex == index;
               return Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: ChoiceChip(
                   label: Text('Meal ${index + 1} ($count)',
-                      style: const TextStyle(fontSize: 11)),
-                  selected: _selectedMealIndex == index,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: active ? Colors.black : const Color(0xFF334155),
+                      )),
+                  selected: active,
                   selectedColor: const Color(0xFFF59E0B),
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: active
+                          ? const Color(0xFFF59E0B)
+                          : const Color(0xFFCBD5E1),
+                    ),
+                  ),
                   onSelected: (v) => setState(() => _selectedMealIndex = index),
                 ),
               );
             }),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Meal ${_selectedMealIndex + 1} Items',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                    color: Color(0xFF0F172A))),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF59E0B)),
+                backgroundColor: const Color(0xFFF59E0B),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(9)),
+              ),
               icon: const Icon(Icons.add, size: 16, color: Colors.black),
               label: const Text('Add Food',
                   style: TextStyle(
@@ -1370,118 +1487,141 @@ class _PlannerScreenState extends State<PlannerScreen>
             ),
           ],
         ),
+        const SizedBox(height: 4),
+
         ..._currentMealList.asMap().entries.map((entry) {
           final int idx = entry.key;
           final MealEntry item = entry.value;
           final String currentUnit =
               _unitOptions.contains(item.food.unit) ? item.food.unit : 'g';
 
-          return Card(
+          return Container(
             key: ValueKey('meal_card_${_selectedMealIndex}_${item.food.id}_$idx'),
             margin: const EdgeInsets.symmetric(vertical: 5),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(item.food.name,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(item.food.name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.5,
+                              color: Color(0xFF0F172A))),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.delete_outline,
+                          color: Colors.redAccent),
+                      onPressed: () =>
+                          setState(() => _currentMealList.removeAt(idx)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 78,
+                      child: TextFormField(
+                        key: ValueKey(
+                            'qty_${_selectedMealIndex}_${item.food.id}_$idx'),
+                        initialValue: item.quantity % 1 == 0
+                            ? item.quantity.toStringAsFixed(0)
+                            : item.quantity.toStringAsFixed(1),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        decoration: _premiumInputDecoration('Qty'),
+                        onChanged: (val) {
+                          final parsed = double.tryParse(val.trim());
+                          if (parsed != null) {
+                            _updateMealEntry(idx, newQty: parsed);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 96,
+                      child: DropdownButtonFormField<String>(
+                        value: currentUnit,
+                        isDense: true,
+                        decoration: _premiumInputDecoration('Unit'),
+                        items: _unitOptions
+                            .map((u) => DropdownMenuItem(
+                                  value: u,
+                                  child: Text(u,
+                                      style: const TextStyle(fontSize: 12)),
+                                ))
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            _updateMealEntry(idx, newUnit: val);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${item.calories.toStringAsFixed(0)} kcal',
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
-                      ),
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: const Icon(Icons.delete, color: Colors.redAccent),
-                        onPressed: () =>
-                            setState(() => _currentMealList.removeAt(idx)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 78,
-                        child: TextFormField(
-                          key: ValueKey('qty_${_selectedMealIndex}_${item.food.id}_$idx'),
-                          initialValue: item.quantity % 1 == 0
-                              ? item.quantity.toStringAsFixed(0)
-                              : item.quantity.toStringAsFixed(1),
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: const InputDecoration(
-                            labelText: 'Qty',
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 8),
-                            border: OutlineInputBorder(),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.5,
+                                color: Color(0xFFD97706)),
                           ),
-                          onChanged: (val) {
-                            final parsed = double.tryParse(val.trim());
-                            if (parsed != null) {
-                              _updateMealEntry(idx, newQty: parsed);
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 96,
-                        child: DropdownButtonFormField<String>(
-                          value: currentUnit,
-                          isDense: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Unit',
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 6),
-                            border: OutlineInputBorder(),
+                          Text(
+                            'P: ${item.protein.toStringAsFixed(1)}g | C: ${item.carbs.toStringAsFixed(1)}g | F: ${item.fats.toStringAsFixed(1)}g',
+                            style: const TextStyle(
+                                fontSize: 10.5, color: Color(0xFF475569)),
+                            textAlign: TextAlign.end,
                           ),
-                          items: _unitOptions
-                              .map((u) => DropdownMenuItem(
-                                    value: u,
-                                    child: Text(u,
-                                        style: const TextStyle(fontSize: 12)),
-                                  ))
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              _updateMealEntry(idx, newUnit: val);
-                            }
-                          },
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${item.calories.toStringAsFixed(0)} kcal',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Color(0xFFD97706)),
-                            ),
-                            Text(
-                              'P: ${item.protein.toStringAsFixed(1)}g | C: ${item.carbs.toStringAsFixed(1)}g | F: ${item.fats.toStringAsFixed(1)}g',
-                              style: const TextStyle(
-                                  fontSize: 10.5, color: Colors.black54),
-                              textAlign: TextAlign.end,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           );
         }).toList(),
       ],
+    );
+  }
+
+  Widget _macroPill(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -1492,22 +1632,43 @@ class _PlannerScreenState extends State<PlannerScreen>
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
+        // PREMIUM SPLIT SWITCHER CARD
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(8)),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.45)),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Active Split: $_activeSplit  •  ${_getDayFocusLabel(_selectedDay)}',
-                style: const TextStyle(
-                    color: Color(0xFFF59E0B),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Active Split: $_activeSplit',
+                    style: const TextStyle(
+                      color: Color(0xFFF59E0B),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Text(
+                    _getDayFocusLabel(_selectedDay),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
@@ -1523,12 +1684,20 @@ class _PlannerScreenState extends State<PlannerScreen>
                   return ChoiceChip(
                     label: Text(label,
                         style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.bold,
                             color: isSelected ? Colors.black : Colors.white)),
                     selected: isSelected,
                     selectedColor: const Color(0xFFF59E0B),
-                    backgroundColor: const Color(0xFF1E293B),
+                    backgroundColor: const Color(0xFF0F172A),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(
+                        color: isSelected
+                            ? const Color(0xFFF59E0B)
+                            : Colors.white24,
+                      ),
+                    ),
                     onSelected: (_) => _loadWorkoutSplit(s),
                   );
                 }).toList(),
@@ -1537,17 +1706,34 @@ class _PlannerScreenState extends State<PlannerScreen>
           ),
         ),
         const SizedBox(height: 10),
+
+        // DAY CHIPS
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) {
               int count = _weeklyWorkout[d]?.length ?? 0;
+              final active = _selectedDay == d;
               return Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: ChoiceChip(
-                  label: Text('$d ($count)', style: const TextStyle(fontSize: 11)),
-                  selected: _selectedDay == d,
+                  label: Text('$d ($count)',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: active ? Colors.black : const Color(0xFF334155),
+                      )),
+                  selected: active,
                   selectedColor: const Color(0xFFF59E0B),
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: active
+                          ? const Color(0xFFF59E0B)
+                          : const Color(0xFFCBD5E1),
+                    ),
+                  ),
                   onSelected: (v) => setState(() => _selectedDay = d),
                 ),
               );
@@ -1555,6 +1741,7 @@ class _PlannerScreenState extends State<PlannerScreen>
           ),
         ),
         const SizedBox(height: 10),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1564,10 +1751,12 @@ class _PlannerScreenState extends State<PlannerScreen>
                 children: [
                   Text('$_selectedDay Routine',
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.5,
+                          color: Color(0xFF0F172A))),
                   Text(_getDayFocusLabel(_selectedDay),
                       style: const TextStyle(
-                          fontSize: 11, color: Colors.black54)),
+                          fontSize: 11.5, color: Color(0xFF475569))),
                 ],
               ),
             ),
@@ -1575,14 +1764,24 @@ class _PlannerScreenState extends State<PlannerScreen>
               children: [
                 if (currentDayExercises.isNotEmpty)
                   OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Color(0xFFCBD5E1)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9)),
+                    ),
                     onPressed: () => _showMoveEntireDayDialog(_selectedDay),
-                    child:
-                        const Text('Move Day', style: TextStyle(fontSize: 11)),
+                    child: const Text('Move Day',
+                        style: TextStyle(
+                            fontSize: 11, color: Color(0xFF0F172A))),
                   ),
                 const SizedBox(width: 6),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF59E0B)),
+                    backgroundColor: const Color(0xFFF59E0B),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9)),
+                  ),
                   icon: const Icon(Icons.add, size: 16, color: Colors.black),
                   label: const Text('Add Exercise',
                       style: TextStyle(
@@ -1596,29 +1795,52 @@ class _PlannerScreenState extends State<PlannerScreen>
           ],
         ),
         const SizedBox(height: 6),
+
         if (currentDayExercises.isEmpty)
-          Card(
+          Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                '$_selectedDay (${_getDayFocusLabel(_selectedDay)}) — Abhi koi exercise add nahi hai. Upar se split switch karein ya "+ Add Exercise" dabayein.',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Text(
+              '$_selectedDay (${_getDayFocusLabel(_selectedDay)}) — Abhi koi exercise add nahi hai. Upar se split switch karein ya "+ Add Exercise" dabayein.',
+              style: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
             ),
           )
         else
           ...currentDayExercises.asMap().entries.map((e) {
             int idx = e.key;
             WorkoutExercise ex = e.value;
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4),
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 4.5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0F172A).withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
               child: ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 title: Text(ex.name,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 13)),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: Color(0xFF0F172A))),
                 subtitle: Text(
-                    '${ex.sets} Sets × ${ex.reps} Reps | Rest: ${ex.restSeconds}'),
+                  '${ex.sets} Sets × ${ex.reps} Reps | Rest: ${ex.restSeconds}',
+                  style: const TextStyle(
+                      fontSize: 11.5, color: Color(0xFF475569)),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -1628,7 +1850,8 @@ class _PlannerScreenState extends State<PlannerScreen>
                       onPressed: () => _showMoveExerciseDialog(ex, _selectedDay),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      icon: const Icon(Icons.delete_outline,
+                          color: Colors.redAccent),
                       onPressed: () => setState(
                           () => _weeklyWorkout[_selectedDay]?.removeAt(idx)),
                     ),
